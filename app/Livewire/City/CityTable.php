@@ -37,7 +37,7 @@ final class CityTable extends PowerGridComponent
         return City::query()
             ->with('province')
             ->select('cities.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY cities.' . $sortField . ' ' . $sortDirection . ') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY cities.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -53,7 +53,7 @@ final class CityTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('province_name', fn(City $city) => $city->province?->name)
+            ->add('province_name', fn (City $city) => $city->province?->name)
             ->add('name')
             ->add('type')
             ->add('code')
@@ -97,7 +97,7 @@ final class CityTable extends PowerGridComponent
     {
         return [
             Button::add('edit')
-                ->slot('Edit: ' . $row->id)
+                ->slot('Edit: '.$row->id)
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
                 ->dispatch(self::EDIT_EVENT, ['rowId' => $row->id]),

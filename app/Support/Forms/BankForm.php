@@ -7,7 +7,9 @@ use App\Models\Bank;
 class BankForm
 {
     public const REFRESH_EVENT = 'pg:eventRefresh-bankTable';
+
     public const EDIT_EVENT = 'bank:edit';
+
     public const DELETE_EVENT = 'bank:delete';
 
     public static function make(

@@ -37,7 +37,7 @@ final class BankTable extends PowerGridComponent
 
         return Bank::query()
             ->select('banks.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY banks.' . $sortField . ' ' . $sortDirection . ') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY banks.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -52,7 +52,7 @@ final class BankTable extends PowerGridComponent
             ->add('code')
             ->add('name')
             ->add('status')
-            ->add('created_at_formatted', fn(Bank $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
+            ->add('created_at_formatted', fn (Bank $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
     }
 
     public function columns(): array
@@ -116,5 +116,4 @@ final class BankTable extends PowerGridComponent
                 ->dispatch(BankForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];
     }
-
 }

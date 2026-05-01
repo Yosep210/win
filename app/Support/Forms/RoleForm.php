@@ -7,7 +7,9 @@ use Spatie\Permission\Models\Role;
 class RoleForm
 {
     public const REFRESH_EVENT = 'pg:eventRefresh-roleTable';
+
     public const EDIT_EVENT = 'role:edit';
+
     public const DELETE_EVENT = 'role:delete';
 
     public static function make(

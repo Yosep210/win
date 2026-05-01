@@ -7,7 +7,9 @@ use Spatie\Permission\Models\Permission;
 class PermissionForm
 {
     public const REFRESH_EVENT = 'pg:eventRefresh-permissionTable';
+
     public const EDIT_EVENT = 'permission:edit';
+
     public const DELETE_EVENT = 'permission:delete';
 
     public static function make(

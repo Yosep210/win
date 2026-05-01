@@ -39,7 +39,7 @@ final class UserTable extends PowerGridComponent
             ->with('roles')
             ->withoutRole(['admin', 'staff'])
             ->select('users.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY users.' . $sortField . ' ' . $sortDirection . ') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY users.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -54,8 +54,8 @@ final class UserTable extends PowerGridComponent
             ->add('name')
             ->add('username')
             ->add('email')
-            ->add('roles', fn(User $user) => $user->roles->pluck('name')->join(', '))
-            ->add('created_at_formatted', fn(User $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
+            ->add('roles', fn (User $user) => $user->roles->pluck('name')->join(', '))
+            ->add('created_at_formatted', fn (User $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
     }
 
     public function columns(): array

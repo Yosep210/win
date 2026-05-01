@@ -3,25 +3,35 @@
 namespace App\Livewire;
 
 use Flux\Flux;
-use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class DynamicModalForm extends Component
 {
     public string $title = 'Form';
+
     public string $modalName = 'dynamic-modal';
+
     public string $submitLabel = 'Simpan';
+
     public string $cancelLabel = 'Batal';
+
     public string $successMessage = 'Data berhasil disimpan.';
+
     public array $fields = [];
+
     public array $data = [];
+
     public ?string $modelClass = null;
+
     public ?int $modelId = null;
+
     public ?string $refreshEvent = null;
+
     public array $validationMessages = [];
 
     #[On('open-dynamic-modal')]
@@ -69,7 +79,7 @@ class DynamicModalForm extends Component
         /** @var Model $model */
         $model = $this->modelId
             ? $this->modelClass::query()->findOrFail($this->modelId)
-            : new $this->modelClass();
+            : new $this->modelClass;
 
         try {
             $model->fill($this->payload());
