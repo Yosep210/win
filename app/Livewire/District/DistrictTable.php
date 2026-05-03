@@ -2,7 +2,9 @@
 
 namespace App\Livewire\District;
 
+use App\Livewire\DynamicModalForm;
 use App\Models\District;
+use App\Support\Forms\DistrictForm;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
@@ -15,8 +17,6 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class DistrictTable extends PowerGridComponent
 {
-    private const EDIT_EVENT = 'district:edit';
-
     public string $tableName = 'districtTable';
 
     public function setUp(): array
@@ -80,20 +80,44 @@ final class DistrictTable extends PowerGridComponent
         ];
     }
 
-    #[On(self::EDIT_EVENT)]
+    #[On(DistrictForm::EDIT_EVENT)]
     public function edit(int $rowId): void
     {
-        Flux::toast(variant: 'warning', text: "Fitur edit District belum diimplementasikan. ID: {$rowId}");
+        $this->dispatch('open-dynamic-modal', config: DistrictForm::make(
+            title: 'Edit District',
+            modelId: $rowId,
+            successMessage: 'Data District berhasil diperbarui.',
+        ))->to(DynamicModalForm::class);
+        // Flux::toast(variant: 'warning', text: "Fitur edit District belum diimplementasikan. ID: {$rowId}");
+    }
+
+    #[On(DistrictForm::DELETE_EVENT)]
+    public function delete(int $rowId): void
+    {
+        $district = District::findOrFail($rowId);
+        $district->delete();
+
+        Flux::toast(
+            variant: 'success',
+            text: 'Data District berhasil dihapus.',
+        );
+
+        $this->dispatch('$commit')->self();
     }
 
     public function actions(District $row): array
     {
         return [
             Button::add('edit')
-                ->slot('Edit: '.$row->id)
+                ->slot('Edit')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch(self::EDIT_EVENT, ['rowId' => $row->id]),
+                ->dispatch(DistrictForm::EDIT_EVENT, ['rowId' => $row->id]),
+            Button::add('delete')
+                ->slot('Delete')
+                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->confirm('Are you sure you want to delete this district?')
+                ->dispatch(DistrictForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];
     }
 }

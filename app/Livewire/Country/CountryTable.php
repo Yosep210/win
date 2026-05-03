@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Country;
 
+use App\Livewire\DynamicModalForm;
 use App\Models\Country;
+use App\Support\Forms\CountryForm;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
@@ -15,8 +17,6 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class CountryTable extends PowerGridComponent
 {
-    private const EDIT_EVENT = 'country:edit';
-
     public string $tableName = 'countryTable';
 
     public function setUp(): array
@@ -30,7 +30,13 @@ final class CountryTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Country::query();
+        $allowedSorts = ['iso', 'name', 'nice_name', 'iso3', 'num_code', 'phone_code', 'status'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        return Country::query()
+            ->select('countries.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY countries.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -78,32 +84,44 @@ final class CountryTable extends PowerGridComponent
         ];
     }
 
-    #[On(self::EDIT_EVENT)]
+    #[On(CountryForm::EDIT_EVENT)]
     public function edit(int $rowId): void
     {
-        Flux::toast(variant: 'warning', text: "Fitur edit Country belum diimplementasikan. ID: {$rowId}");
+        $this->dispatch('open-dynamic-modal', config: CountryForm::make(
+            title: 'Edit Country',
+            modelId: $rowId,
+            successMessage: 'Data Country berhasil diperbarui.',
+        ))->to(DynamicModalForm::class);
+        // Flux::toast(variant: 'warning', text: "Fitur edit Country belum diimplementasikan. ID: {$rowId}");
+    }
+
+    #[On(CountryForm::DELETE_EVENT)]
+    public function delete(int $rowId): void
+    {
+        $country = Country::findOrFail($rowId);
+        $country->delete();
+
+        Flux::toast(
+            variant: 'success',
+            text: 'Data Country berhasil dihapus.',
+        );
+
+        $this->dispatch('$commit')->self();
     }
 
     public function actions(Country $row): array
     {
         return [
             Button::add('edit')
-                ->slot('Edit: '.$row->id)
+                ->slot('Edit')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch(self::EDIT_EVENT, ['rowId' => $row->id]),
+                ->dispatch(CountryForm::EDIT_EVENT, ['rowId' => $row->id]),
+            Button::add('delete')
+                ->slot('Delete')
+                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->confirm('Are you sure you want to delete this country?')
+                ->dispatch(CountryForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];
     }
-
-    /*
-    public function actionRules($row): array
-    {
-       return [
-            // Hide button edit for ID 1
-            Rule::button('edit')
-                ->when(fn($row) => $row->id === 1)
-                ->hide(),
-        ];
-    }
-    */
 }

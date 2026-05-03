@@ -16,7 +16,7 @@
         $menus = \App\Services\MenuService::get('Menu')
         @endphp
 
-        <flux:sidebar.nav>
+        <flux:sidebar.nav class="flex-1 overflow-y-auto">
             @foreach ($menus as $menu)
             @if (!empty($menu['sub']))
             <flux:sidebar.group :icon="$menu['icon']" :heading="$menu['heading']" class="grid" expandable
@@ -36,22 +36,9 @@
             @endif
             @endforeach
         </flux:sidebar.nav>
-
-        <flux:spacer />
-
-        <flux:sidebar.nav>
-            <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit"
-                target="_blank">
-                {{ __('Repository') }}
-            </flux:sidebar.item>
-
-            <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire"
-                target="_blank">
-                {{ __('Documentation') }}
-            </flux:sidebar.item>
-        </flux:sidebar.nav>
-
-        <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
+        <div class="hidden mt-auto border-t border-zinc-200 pt-2 dark:border-zinc-700 lg:block">
+            <x-desktop-user-menu :name="auth()->user()->name" />
+        </div>
     </flux:sidebar>
 
     <!-- Mobile User Menu -->

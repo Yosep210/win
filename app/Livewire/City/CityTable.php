@@ -2,7 +2,9 @@
 
 namespace App\Livewire\City;
 
+use App\Livewire\DynamicModalForm;
 use App\Models\City;
+use App\Support\Forms\CityForm;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
@@ -15,8 +17,6 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class CityTable extends PowerGridComponent
 {
-    private const EDIT_EVENT = 'city:edit';
-
     public string $tableName = 'cityTable';
 
     public function setUp(): array
@@ -87,20 +87,44 @@ final class CityTable extends PowerGridComponent
         ];
     }
 
-    #[On(self::EDIT_EVENT)]
+    #[On(CityForm::EDIT_EVENT)]
     public function edit(int $rowId): void
     {
-        Flux::toast(variant: 'warning', text: "Fitur edit City belum diimplementasikan. ID: {$rowId}");
+        $this->dispatch('open-dynamic-modal', config: CityForm::make(
+            title: 'Edit Data City',
+            modelId: $rowId,
+            successMessage: 'Data City berhasil diperbarui.',
+        ))->to(DynamicModalForm::class);
+        // Flux::toast(variant: 'warning', text: "Fitur edit City belum diimplementasikan. ID: {$rowId}");
+    }
+
+    #[On(CityForm::DELETE_EVENT)]
+    public function delete(int $rowId): void
+    {
+        $city = City::findOrFail($rowId);
+        $city->delete();
+
+        Flux::toast(
+            variant: 'success',
+            text: 'Data City berhasil dihapus.',
+        );
+
+        $this->dispatch('$commit')->self();
     }
 
     public function actions(City $row): array
     {
         return [
             Button::add('edit')
-                ->slot('Edit: '.$row->id)
+                ->slot('Edit')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch(self::EDIT_EVENT, ['rowId' => $row->id]),
+                ->dispatch(CityForm::EDIT_EVENT, ['rowId' => $row->id]),
+            Button::add('delete')
+                ->slot('Delete')
+                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->confirm('Are you sure you want to delete this city?')
+                ->dispatch(CityForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];
     }
 }

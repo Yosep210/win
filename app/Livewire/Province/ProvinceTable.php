@@ -3,6 +3,7 @@
 namespace App\Livewire\Province;
 
 use App\Models\Province;
+use App\Support\Forms\ProvinceForm;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
@@ -15,8 +16,6 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class ProvinceTable extends PowerGridComponent
 {
-    private const EDIT_EVENT = 'province:edit';
-
     public string $tableName = 'provinceTable';
 
     public function setUp(): array
@@ -30,7 +29,13 @@ final class ProvinceTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Province::query();
+        $allowedSorts = ['id', 'name', 'code'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        return Province::query()
+            ->select('provinces.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY provinces.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -41,7 +46,7 @@ final class ProvinceTable extends PowerGridComponent
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
-            ->add('id')
+            ->add('no')
             ->add('name')
             ->add('code');
     }
@@ -49,7 +54,7 @@ final class ProvinceTable extends PowerGridComponent
     public function columns(): array
     {
         return [
-            Column::make('Id', 'id'),
+            Column::make('#', 'no'),
             Column::make('Province', 'name')->sortable(),
             Column::make('Code', 'code')->sortable(),
             Column::action('Action'),
@@ -64,20 +69,42 @@ final class ProvinceTable extends PowerGridComponent
         ];
     }
 
-    #[On(self::EDIT_EVENT)]
+    #[On(ProvinceForm::EDIT_EVENT)]
     public function edit(int $rowId): void
     {
-        Flux::toast(variant: 'warning', text: "Fitur edit Province belum diimplementasikan. ID: {$rowId}");
+        $this->dispatch('open-dynamic-modal', config: ProvinceForm::make(
+            title: 'Edit Province',
+            provinceId: $rowId,
+        ));
+    }
+
+    #[On(ProvinceForm::DELETE_EVENT)]
+    public function delete(int $rowId): void
+    {
+        $province = Province::findOrFail($rowId);
+        $province->delete();
+
+        Flux::toast(
+            variant: 'success',
+            text: 'Data Province berhasil dihapus.',
+        );
+
+        $this->dispatch('$commit')->self();
     }
 
     public function actions(Province $row): array
     {
         return [
             Button::add('edit')
-                ->slot('Edit: '.$row->id)
+                ->slot('Edit')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch(self::EDIT_EVENT, ['rowId' => $row->id]),
+                ->dispatch(ProvinceForm::EDIT_EVENT, ['rowId' => $row->id]),
+            Button::add('delete')
+                ->slot('Delete')
+                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->confirm('Are you sure you want to delete this province?')
+                ->dispatch(ProvinceForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];
     }
 }
