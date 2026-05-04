@@ -76,4 +76,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(BankAccount::class);
     }
+
+    public static function userCount(): int
+    {
+        return self::count();
+    }
 }

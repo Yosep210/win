@@ -14,4 +14,9 @@ class Bank extends Model
             'status' => 'boolean',
         ];
     }
+
+    public static function bankCount(): int
+    {
+        return self::count();
+    }
 }

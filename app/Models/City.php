@@ -15,4 +15,9 @@ class City extends Model
     {
         return $this->belongsTo(Province::class);
     }
+
+    public static function cityCount(): int
+    {
+        return self::count();
+    }
 }

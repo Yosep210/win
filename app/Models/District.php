@@ -15,4 +15,9 @@ class District extends Model
     {
         return $this->belongsTo(City::class);
     }
+
+    public static function districtCount(): int
+    {
+        return self::count();
+    }
 }

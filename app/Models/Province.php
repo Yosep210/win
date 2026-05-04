@@ -9,4 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 class Province extends Model
 {
     public $timestamps = false;
+
+    public static function provinceCount(): int
+    {
+        return self::count();
+    }
 }
