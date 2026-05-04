@@ -43,7 +43,7 @@ return [
         [
             'heading' => 'Master Data',
             'icon' => 'circle-stack',
-            'route' => ['area.*', 'bank.*', 'city.*', 'country.*', 'district.*', 'membership.*', 'package.*', 'province.*'],
+            'route' => ['area.*', 'bank.*', 'city.*', 'country.*', 'district.*', 'membership.*', 'package.*', 'province.*', 'rank.*', 'product.*', 'product-category.*', 'product-variant.*', 'suppliers.*'],
             'sub' => [
                 [
                     'title' => 'Area',
@@ -83,6 +83,31 @@ return [
                 [
                     'title' => 'Province',
                     'href' => 'province.index',
+                    'role' => 'admin',
+                ],
+                [
+                    'title' => 'Rank',
+                    'href' => 'rank.index',
+                    'role' => 'admin',
+                ],
+                [
+                    'title' => 'Product',
+                    'href' => 'product.index',
+                    'role' => 'admin',
+                ],
+                [
+                    'title' => 'Product Category',
+                    'href' => 'product-category.index',
+                    'role' => 'admin',
+                ],
+                [
+                    'title' => 'Product Variant',
+                    'href' => 'product-variant.index',
+                    'role' => 'admin',
+                ],
+                [
+                    'title' => 'Suppliers',
+                    'href' => 'suppliers.index',
                     'role' => 'admin',
                 ],
             ],

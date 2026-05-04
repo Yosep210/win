@@ -9,8 +9,13 @@ use App\Livewire\Member;
 use App\Livewire\Membership;
 use App\Livewire\Package;
 use App\Livewire\Permission;
+use App\Livewire\Product;
+use App\Livewire\ProductCategories;
+use App\Livewire\ProductVariant;
 use App\Livewire\Province;
+use App\Livewire\Rank;
 use App\Livewire\Role;
+use App\Livewire\Suppliers;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
@@ -27,4 +32,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::livewire('membership', Membership\Index::class)->name('membership.index');
     Route::livewire('package', Package\Index::class)->name('package.index');
     Route::livewire('province', Province\Index::class)->name('province.index');
+    Route::livewire('rank', Rank\Index::class)->name('rank.index');
+    Route::livewire('products', Product\Index::class)->name('product.index');
+    Route::livewire('product-categories', ProductCategories\Index::class)->name('product-category.index');
+    Route::livewire('product-variants', ProductVariant\Index::class)->name('product-variant.index');
+    Route::livewire('suppliers', Suppliers\Index::class)->name('suppliers.index');
 });

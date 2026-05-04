@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Livewire\Country;
+namespace App\Livewire\Suppliers;
 
 use App\Livewire\DynamicModalForm;
-use App\Models\Country;
-use App\Support\Forms\CountryForm;
+use App\Models\Suppliers;
+use App\Support\Forms\SuppliersForm;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use Livewire\Attributes\On;
 use PowerComponents\LivewirePowerGrid\Button;
 use PowerComponents\LivewirePowerGrid\Column;
@@ -15,9 +16,9 @@ use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
-final class CountryTable extends PowerGridComponent
+final class SuppliersTable extends PowerGridComponent
 {
-    public string $tableName = 'countryTable';
+    public string $tableName = 'suppliersTable';
 
     public function setUp(): array
     {
@@ -30,13 +31,13 @@ final class CountryTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['id', 'iso', 'name', 'nice_name', 'iso3', 'num_code', 'phone_code', 'status'];
+        $allowedSorts = ['id', 'name', 'email', 'phone', 'contact_id', 'status', 'created_at'];
         $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
-        return Country::query()
-            ->select('countries.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY countries.'.$sortField.' '.$sortDirection.') AS no');
+        return Suppliers::query()
+            ->select('suppliers.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY suppliers.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -48,26 +49,26 @@ final class CountryTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('iso')
             ->add('name')
-            ->add('nice_name')
-            ->add('iso3')
-            ->add('num_code')
-            ->add('phone_code')
-            ->add('status');
+            ->add('email')
+            ->add('phone')
+            ->add('contact_id')
+            ->add('status')
+            ->add('address')
+            ->add('created_at_formatted', fn (Suppliers $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
     }
 
     public function columns(): array
     {
         return [
             Column::make('#', 'no'),
-            Column::make('Iso', 'iso')->sortable(),
             Column::make('Name', 'name')->sortable(),
-            Column::make('Nice name', 'nice_name')->sortable(),
-            Column::make('Iso3', 'iso3')->sortable(),
-            Column::make('Num code', 'num_code')->sortable(),
-            Column::make('Phone code', 'phone_code')->sortable(),
+            Column::make('Email', 'email')->sortable(),
+            Column::make('Phone', 'phone')->sortable(),
+            Column::make('Contact ID', 'contact_id')->sortable(),
             Column::make('Status', 'status')->sortable(),
+            Column::make('Address', 'address')->sortable(),
+            Column::make('Created at', 'created_at_formatted', 'created_at')->sortable(),
             Column::action('Action'),
         ];
     }
@@ -75,52 +76,53 @@ final class CountryTable extends PowerGridComponent
     public function filters(): array
     {
         return [
-            Filter::InputText('iso')->operators(['contains']),
             Filter::InputText('name')->operators(['contains']),
-            Filter::InputText('nice_name')->operators(['contains']),
-            Filter::InputText('iso3')->operators(['contains']),
-            Filter::InputText('num_code')->operators(['contains']),
-            Filter::InputText('phone_code')->operators(['contains']),
+            Filter::InputText('email')->operators(['contains']),
+            Filter::InputText('phone')->operators(['contains']),
+            Filter::InputText('contact_id')->operators(['contains']),
+            Filter::InputText('status')->operators(['contains']),
+            Filter::InputText('address')->operators(['contains']),
+            Filter::datetimepicker('created_at'),
         ];
     }
 
-    #[On(CountryForm::EDIT_EVENT)]
+    #[On(SuppliersForm::EDIT_EVENT)]
     public function edit(int $rowId): void
     {
-        $this->dispatch('open-dynamic-modal', config: CountryForm::make(
-            title: 'Edit Country',
+        $this->dispatch('open-dynamic-modal', config: SuppliersForm::make(
+            title: 'Edit Supplier',
             modelId: $rowId,
-            successMessage: 'Data Country berhasil diperbarui.',
+            successMessage: 'Data supplier berhasil diperbarui.',
         ))->to(DynamicModalForm::class);
     }
 
-    #[On(CountryForm::DELETE_EVENT)]
+    #[On(SuppliersForm::DELETE_EVENT)]
     public function delete(int $rowId): void
     {
-        $country = Country::findOrFail($rowId);
-        $country->delete();
+        $supplier = Suppliers::findOrFail($rowId);
+        $supplier->delete();
 
         Flux::toast(
             variant: 'success',
-            text: 'Data Country berhasil dihapus.',
+            text: 'Data supplier berhasil dihapus.',
         );
 
         $this->dispatch('$commit')->self();
     }
 
-    public function actions(Country $row): array
+    public function actions(Suppliers $row): array
     {
         return [
             Button::add('edit')
                 ->slot('Edit')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch(CountryForm::EDIT_EVENT, ['rowId' => $row->id]),
+                ->dispatch(SuppliersForm::EDIT_EVENT, ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
                 ->class('pg-btn-white dark:ring-pg-red-600 dark:border-pg-red-600 dark:hover:bg-pg-red-700 dark:ring-offset-pg-red-800 dark:text-pg-red-300 dark:bg-pg-red-700')
-                ->confirm('Are you sure you want to delete this country?')
-                ->dispatch(CountryForm::DELETE_EVENT, ['rowId' => $row->id]),
+                ->confirm('Are you sure you want to delete this supplier?')
+                ->dispatch(SuppliersForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];
     }
 }
