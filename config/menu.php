@@ -43,8 +43,13 @@ return [
         [
             'heading' => 'Master Data',
             'icon' => 'circle-stack',
-            'route' => ['bank.*', 'city.*', 'country.*', 'district.*', 'membership.*', 'package.*', 'province.*'],
+            'route' => ['area.*', 'bank.*', 'city.*', 'country.*', 'district.*', 'membership.*', 'package.*', 'province.*'],
             'sub' => [
+                [
+                    'title' => 'Area',
+                    'href' => 'area.index',
+                    'role' => 'admin',
+                ],
                 [
                     'title' => 'Bank',
                     'href' => 'bank.index',

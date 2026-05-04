@@ -43,7 +43,7 @@ $districtCount = District::districtCount();
                 @endif
             </div>
             <div
-                class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
+                class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
                 @if (!empty ($permissionCount))
                 <div class="absolute inset-0 flex flex-col items-center justify-center gap-2">
                     <h2>{{ __('Permissions') }}</h2>
