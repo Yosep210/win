@@ -36,8 +36,8 @@ final class SupplierTable extends PowerGridComponent
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Supplier::query()
-            ->select('Supplier.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY Supplier.'.$sortField.' '.$sortDirection.') AS no');
+            ->select('supplier.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY supplier.' . $sortField . ' ' . $sortDirection . ') AS no');
     }
 
     public function relationSearch(): array
@@ -55,7 +55,7 @@ final class SupplierTable extends PowerGridComponent
             ->add('contact_id')
             ->add('status')
             ->add('address')
-            ->add('created_at_formatted', fn (Supplier $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
+            ->add('created_at_formatted', fn(Supplier $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
     }
 
     public function columns(): array
@@ -76,12 +76,12 @@ final class SupplierTable extends PowerGridComponent
     public function filters(): array
     {
         return [
-            Filter::InputText('name')->operators(['contains']),
-            Filter::InputText('email')->operators(['contains']),
-            Filter::InputText('phone')->operators(['contains']),
-            Filter::InputText('contact_id')->operators(['contains']),
-            Filter::InputText('status')->operators(['contains']),
-            Filter::InputText('address')->operators(['contains']),
+            Filter::inputText('name')->operators(['contains']),
+            Filter::inputText('email')->operators(['contains']),
+            Filter::inputText('phone')->operators(['contains']),
+            Filter::inputText('contact_id')->operators(['contains']),
+            Filter::inputText('status')->operators(['contains']),
+            Filter::inputText('address')->operators(['contains']),
             Filter::datetimepicker('created_at'),
         ];
     }

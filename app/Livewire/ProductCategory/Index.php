@@ -19,6 +19,6 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.product-categories.index');
+        return view('livewire.product-category.index');
     }
 }

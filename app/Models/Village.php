@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['district_id', 'name', 'postal_code', 'external_id'])]

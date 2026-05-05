@@ -2,6 +2,6 @@
     <div class="flex items-center justify-end gap-2">
         <flux:button wire:click="create">Add</flux:button>
     </div>
-    <livewire:product-categories.product-categories-table />
+    <livewire:product-category.product-category-table />
     <livewire:dynamic-modal-form />
 </div>
