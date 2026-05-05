@@ -30,14 +30,23 @@ final class ProvinceTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['id', 'country_id', 'name', 'code'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $allowedSorts = ['country_name', 'name', 'code'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'provinces.id';
+
+        // Map alias fields to actual table columns for ROW_NUMBER
+        $rowNumberSortField = match ($sortField) {
+            'country_name' => 'countries.name',
+            'name' => 'provinces.name',
+            'code' => 'provinces.code',
+            default => 'provinces.id'
+        };
+
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Province::query()
-            ->select('provinces.*')
-            ->with('country')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY provinces.'.$sortField.' '.$sortDirection.') AS no');
+            ->leftJoin('countries', 'provinces.countrie_id', '=', 'countries.id')
+            ->select('provinces.*', 'countries.name as country_name')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY ' . $rowNumberSortField . ' ' . $sortDirection . ') AS no');
     }
 
     public function relationSearch(): array
@@ -53,7 +62,7 @@ final class ProvinceTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('country_name', fn (Province $model) => $model->country?->name ?? '-')
+            ->add('country_name')
             ->add('name')
             ->add('code');
     }

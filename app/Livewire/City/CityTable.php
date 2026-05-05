@@ -30,14 +30,26 @@ final class CityTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['province_id', 'name', 'type', 'code', 'postal_code', 'external_id'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $allowedSorts = ['province_name', 'name', 'type', 'code', 'postal_code', 'external_id'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'cities.id';
+
+        // Map alias fields to actual table columns for ROW_NUMBER
+        $rowNumberSortField = match ($sortField) {
+            'province_name' => 'provinces.name',
+            'name' => 'cities.name',
+            'type' => 'cities.type',
+            'code' => 'cities.code',
+            'postal_code' => 'cities.postal_code',
+            'external_id' => 'cities.external_id',
+            default => 'cities.id'
+        };
+
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return City::query()
-            ->with('province')
-            ->select('cities.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY cities.'.$sortField.' '.$sortDirection.') AS no');
+            ->leftJoin('provinces', 'cities.province_id', '=', 'provinces.id')
+            ->select('cities.*', 'provinces.name as province_name')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -53,7 +65,7 @@ final class CityTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('province_name', fn (City $city) => $city->province?->name)
+            ->add('province_name')
             ->add('name')
             ->add('type')
             ->add('code')

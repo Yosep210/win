@@ -30,12 +30,24 @@ final class VillageTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $alowedSorts = ['id', 'district_id', 'name', 'postal_code', 'external_id'];
-        $sortField = in_array($this->sortField, $alowedSorts) ? $this->sortField : 'id';
+        $allowedSorts = ['district_name', 'name', 'postal_code', 'external_id'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'villages.id';
+
+        // Map alias fields to actual table columns for ROW_NUMBER
+        $rowNumberSortField = match ($sortField) {
+            'district_name' => 'districts.name',
+            'name' => 'villages.name',
+            'postal_code' => 'villages.postal_code',
+            'external_id' => 'villages.external_id',
+            default => 'villages.id'
+        };
+
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
-        return Village::query()->with('district')->select('villages.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY villages.'.$sortField.' '.$sortDirection.') AS no');
+        return Village::query()
+            ->leftJoin('districts', 'villages.district_id', '=', 'districts.id')
+            ->select('villages.*', 'districts.name as district_name')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -51,7 +63,7 @@ final class VillageTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('district_name', fn (Village $village) => $village->district?->name ?? '-')
+            ->add('district_name')
             ->add('name')
             ->add('postal_code')
             ->add('external_id');

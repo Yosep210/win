@@ -30,14 +30,24 @@ final class DistrictTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['city_id', 'name', 'postal_code', 'external_id'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $allowedSorts = ['city_name', 'name', 'postal_code', 'external_id'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'districts.id';
+
+        // Map alias fields to actual table columns for ROW_NUMBER
+        $rowNumberSortField = match ($sortField) {
+            'city_name' => 'cities.name',
+            'name' => 'districts.name',
+            'postal_code' => 'districts.postal_code',
+            'external_id' => 'districts.external_id',
+            default => 'districts.id'
+        };
+
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return District::query()
-            ->with('city')
-            ->select('districts.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY districts.'.$sortField.' '.$sortDirection.') AS no');
+            ->leftJoin('cities', 'districts.city_id', '=', 'cities.id')
+            ->select('districts.*', 'cities.name as city_name')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -53,7 +63,8 @@ final class DistrictTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('city_name', fn (District $district) => $district->city?->name)
+            ->add('city_name')
+            ->add('name')
             ->add('postal_code')
             ->add('external_id');
     }

@@ -31,14 +31,53 @@ final class MembershipTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['user_id', 'package_id', 'rank_id', 'as_stockist', 'is_stockist_central', 'stockist_name', 'stockist_province_id', 'stockist_city_id', 'stockist_district_id', 'stockist_village', 'wd_status', 'wd_min', 'is_ro_enabled', 'joined_at', 'upgraded_at', 'stockist_at', 'last_ro_at', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $allowedSorts = ['user_name', 'user_username', 'user_email', 'package_name', 'package_code', 'rank_name', 'rank_code', 'as_stockist', 'is_stockist_central', 'stockist_name', 'stockist_province_id', 'stockist_city_id', 'stockist_district_id', 'stockist_village', 'wd_status', 'wd_min', 'is_ro_enabled', 'joined_at', 'upgraded_at', 'stockist_at', 'last_ro_at', 'created_at'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'memberships.id';
+
+        // Map alias fields to actual table columns for ROW_NUMBER
+        $rowNumberSortField = match ($sortField) {
+            'user_name' => 'users.name',
+            'user_username' => 'users.username',
+            'user_email' => 'users.email',
+            'package_name' => 'packages.name',
+            'package_code' => 'packages.code',
+            'rank_name' => 'ranks.name',
+            'rank_code' => 'ranks.code',
+            'as_stockist' => 'memberships.as_stockist',
+            'is_stockist_central' => 'memberships.is_stockist_central',
+            'stockist_name' => 'memberships.stockist_name',
+            'stockist_province_id' => 'memberships.stockist_province_id',
+            'stockist_city_id' => 'memberships.stockist_city_id',
+            'stockist_district_id' => 'memberships.stockist_district_id',
+            'stockist_village' => 'memberships.stockist_village',
+            'wd_status' => 'memberships.wd_status',
+            'wd_min' => 'memberships.wd_min',
+            'is_ro_enabled' => 'memberships.is_ro_enabled',
+            'joined_at' => 'memberships.joined_at',
+            'upgraded_at' => 'memberships.upgraded_at',
+            'stockist_at' => 'memberships.stockist_at',
+            'last_ro_at' => 'memberships.last_ro_at',
+            'created_at' => 'memberships.created_at',
+            default => 'memberships.id'
+        };
+
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Membership::query()
-            ->with(['user', 'package', 'rank'])
-            ->select('memberships.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY memberships.'.$sortField.' '.$sortDirection.') AS no');
+            ->leftJoin('users', 'memberships.user_id', '=', 'users.id')
+            ->leftJoin('packages', 'memberships.package_id', '=', 'packages.id')
+            ->leftJoin('ranks', 'memberships.rank_id', '=', 'ranks.id')
+            ->select(
+                'memberships.*',
+                'users.name as user_name',
+                'users.username as user_username',
+                'users.email as user_email',
+                'packages.name as package_name',
+                'packages.code as package_code',
+                'ranks.name as rank_name',
+                'ranks.code as rank_code'
+            )
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -64,13 +103,13 @@ final class MembershipTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('user_name', fn (Membership $model) => $model->user?->name ?? '-')
-            ->add('user_username', fn (Membership $model) => $model->user?->username ?? '-')
-            ->add('user_email', fn (Membership $model) => $model->user?->email ?? '-')
-            ->add('package_name', fn (Membership $model) => $model->package?->name ?? '-')
-            ->add('package_code', fn (Membership $model) => $model->package?->code ?? '-')
-            ->add('rank_name', fn (Membership $model) => $model->rank?->name ?? '-')
-            ->add('rank_code', fn (Membership $model) => $model->rank?->code ?? '-')
+            ->add('user_name')
+            ->add('user_username')
+            ->add('user_email')
+            ->add('package_name')
+            ->add('package_code')
+            ->add('rank_name')
+            ->add('rank_code')
             ->add('as_stockist')
             ->add('is_stockist_central')
             ->add('stockist_name')
