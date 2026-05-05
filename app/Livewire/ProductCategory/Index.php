@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Livewire\ProductCategories;
+namespace App\Livewire\ProductCategory;
 
 use App\Livewire\DynamicModalForm;
-use App\Support\Forms\ProductCategoriesForm;
+use App\Support\Forms\ProductCategoryForm;
 use Livewire\Component;
 
 class Index extends Component
 {
     public function create()
     {
-        $this->dispatch('open-dynamic-modal', config: ProductCategoriesForm::make(
+        $this->dispatch('open-dynamic-modal', config: ProductCategoryForm::make(
             title: 'Tambah Kategori Produk Baru',
             successMessage: 'Data kategori produk berhasil ditambahkan.',
         ))

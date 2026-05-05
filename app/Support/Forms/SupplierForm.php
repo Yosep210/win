@@ -2,15 +2,15 @@
 
 namespace App\Support\Forms;
 
-use App\Models\Suppliers;
+use App\Models\Supplier;
 
-class SuppliersForm
+class SupplierForm
 {
-    public const REFRESH_EVENT = 'pg:eventRefresh-suppliersTable';
+    public const REFRESH_EVENT = 'pg:eventRefresh-SupplierTable';
 
-    public const EDIT_EVENT = 'suppliers:edit';
+    public const EDIT_EVENT = 'Supplier:edit';
 
-    public const DELETE_EVENT = 'suppliers:delete';
+    public const DELETE_EVENT = 'Supplier:delete';
 
     public static function make(
         string $title,
@@ -19,7 +19,7 @@ class SuppliersForm
     ): array {
         return [
             'title' => $title,
-            'modelClass' => Suppliers::class,
+            'modelClass' => Supplier::class,
             'modelId' => $modelId,
             'refreshEvent' => self::REFRESH_EVENT,
             'successMessage' => $successMessage,
@@ -31,7 +31,7 @@ class SuppliersForm
                     'name' => 'name',
                     'label' => 'Nama Supplier',
                     'type' => 'text',
-                    'validation' => ['required', 'string', 'max:100', 'unique:suppliers,name,'.($modelId ?? 'NULL').',id'],
+                    'validation' => ['required', 'string', 'max:100', 'unique:Supplier,name,'.($modelId ?? 'NULL').',id'],
                     'placeholder' => 'Masukkan nama supplier',
                 ],
                 [

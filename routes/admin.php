@@ -19,8 +19,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::livewire('province', Livewire\Province\Index::class)->name('province.index');
     Route::livewire('rank', Livewire\Rank\Index::class)->name('rank.index');
     Route::livewire('products', Livewire\Product\Index::class)->name('product.index');
-    Route::livewire('product-categories', Livewire\ProductCategories\Index::class)->name('product-category.index');
+    Route::livewire('product-categories', Livewire\ProductCategory\Index::class)->name('product-category.index');
     Route::livewire('product-variants', Livewire\ProductVariant\Index::class)->name('product-variant.index');
-    Route::livewire('suppliers', Livewire\Suppliers\Index::class)->name('suppliers.index');
+    Route::livewire('Supplier', Livewire\Supplier\Index::class)->name('Supplier.index');
     Route::livewire('village', Livewire\Village\Index::class)->name('village.index');
 });

@@ -31,10 +31,10 @@ class LegacyMasterDataSeeder extends Seeder
         $packages = [];
         $settings = [];
         $options = [];
-        $productCategories = [];
+        $ProductCategory = [];
         $products = [];
         $productVariants = [];
-        $suppliers = [];
+        $Supplier = [];
         $rankNames = [];
 
         $categoryIds = [];
@@ -180,7 +180,7 @@ class LegacyMasterDataSeeder extends Seeder
                         $categoryId = count($categoryIds) + 1;
 
                         $categoryIds[$type] = $categoryId;
-                        $productCategories[] = [
+                        $ProductCategory[] = [
                             'id' => $categoryId,
                             'code' => $categoryCode,
                             'name' => Str::title(str_replace(['-', '_'], ' ', $type)),
@@ -224,7 +224,7 @@ class LegacyMasterDataSeeder extends Seeder
                     break;
 
                 case 'jpb_supplier':
-                    $suppliers[] = [
+                    $Supplier[] = [
                         'name' => $this->stringOrEmpty($row['name']),
                         'email' => $this->nullableString($row['email']),
                         'phone' => $this->nullableString($row['phone']),
@@ -259,10 +259,10 @@ class LegacyMasterDataSeeder extends Seeder
             $settings,
             $options,
             $ranks,
-            $productCategories,
+            $ProductCategory,
             $products,
             $productVariants,
-            $suppliers,
+            $Supplier,
         ): void {
             $this->upsertChunked('areas', $areas, ['id'], ['name', 'code']);
             $this->upsertChunked('banks', $banks, ['id'], ['code', 'name', 'status', 'updated_at']);
@@ -292,10 +292,10 @@ class LegacyMasterDataSeeder extends Seeder
             $this->upsertChunked('settings', array_values($settings), ['key'], ['value', 'updated_at']);
             $this->upsertChunked('options', array_values($options), ['key'], ['value', 'updated_at']);
             $this->upsertChunked('ranks', $ranks, ['code'], ['name', 'sort_order', 'is_active', 'updated_at']);
-            $this->upsertChunked('product_categories', $productCategories, ['id'], ['code', 'name', 'status', 'updated_at']);
+            $this->upsertChunked('product_categories', $ProductCategory, ['id'], ['code', 'name', 'status', 'updated_at']);
             $this->upsertChunked('products', $products, ['id'], ['category_id', 'code', 'name', 'description', 'status', 'updated_at']);
             $this->upsertChunked('product_variants', $productVariants, ['id'], ['product_id', 'code', 'name', 'price', 'bv', 'status', 'updated_at']);
-            $this->upsertChunked('suppliers', $suppliers, ['name'], ['email', 'phone', 'address', 'contact_id', 'status', 'updated_at']);
+            $this->upsertChunked('Supplier', $Supplier, ['name'], ['email', 'phone', 'address', 'contact_id', 'status', 'updated_at']);
         });
 
         $this->command?->info('Legacy master data import completed.');
@@ -310,10 +310,10 @@ class LegacyMasterDataSeeder extends Seeder
         $this->command?->line('- settings: '.count($settings));
         $this->command?->line('- options: '.count($options));
         $this->command?->line('- ranks: '.count($ranks));
-        $this->command?->line('- product categories: '.count($productCategories));
+        $this->command?->line('- product categories: '.count($ProductCategory));
         $this->command?->line('- products: '.count($products));
         $this->command?->line('- product variants: '.count($productVariants));
-        $this->command?->line('- suppliers: '.count($suppliers));
+        $this->command?->line('- Supplier: '.count($Supplier));
         $this->command?->warn('Village master data was not imported because the legacy dump does not contain a dedicated village table.');
     }
 

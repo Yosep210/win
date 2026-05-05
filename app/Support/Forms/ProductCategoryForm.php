@@ -2,11 +2,11 @@
 
 namespace App\Support\Forms;
 
-use App\Models\ProductCategories;
+use App\Models\ProductCategory;
 
-class ProductCategoriesForm
+class ProductCategoryForm
 {
-    public const REFRESH_EVENT = 'pg:eventRefresh-productCategoriesTable';
+    public const REFRESH_EVENT = 'pg:eventRefresh-ProductCategoryTable';
 
     public const EDIT_EVENT = 'product-category:edit';
 
@@ -19,7 +19,7 @@ class ProductCategoriesForm
     ): array {
         return [
             'title' => $title,
-            'modelClass' => ProductCategories::class,
+            'modelClass' => ProductCategory::class,
             'modelId' => $modelId,
             'refreshEvent' => self::REFRESH_EVENT,
             'successMessage' => $successMessage,

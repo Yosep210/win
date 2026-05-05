@@ -3,7 +3,7 @@
 namespace App\Support\Forms;
 
 use App\Models\Product;
-use App\Models\ProductCategories;
+use App\Models\ProductCategory;
 
 class ProductForm
 {
@@ -32,7 +32,7 @@ class ProductForm
                     'name' => 'category_id',
                     'label' => 'Kategori Produk',
                     'type' => 'select',
-                    'options' => ProductCategories::query()->select('id', 'name')->get()->toArray(),
+                    'options' => ProductCategory::query()->select('id', 'name')->get()->toArray(),
                     'validation' => ['nullable', 'exists:product_categories,id'],
                 ],
                 [

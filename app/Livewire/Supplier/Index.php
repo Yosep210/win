@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Livewire\Suppliers;
+namespace App\Livewire\Supplier;
 
 use App\Livewire\DynamicModalForm;
-use App\Support\Forms\SuppliersForm;
+use App\Support\Forms\SupplierForm;
 use Livewire\Component;
 
 class Index extends Component
 {
     public function create()
     {
-        $this->dispatch('open-dynamic-modal', config: SuppliersForm::make(
+        $this->dispatch('open-dynamic-modal', config: SupplierForm::make(
             title: 'Tambah Supplier Baru',
             successMessage: 'Data supplier berhasil ditambahkan.',
         ))
@@ -19,6 +19,6 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.suppliers.index');
+        return view('livewire.Supplier.index');
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire\Suppliers;
+namespace App\Livewire\Supplier;
 
 use App\Livewire\DynamicModalForm;
-use App\Models\Suppliers;
-use App\Support\Forms\SuppliersForm;
+use App\Models\Supplier;
+use App\Support\Forms\SupplierForm;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -16,9 +16,9 @@ use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
-final class SuppliersTable extends PowerGridComponent
+final class SupplierTable extends PowerGridComponent
 {
-    public string $tableName = 'suppliersTable';
+    public string $tableName = 'SupplierTable';
 
     public function setUp(): array
     {
@@ -35,9 +35,9 @@ final class SuppliersTable extends PowerGridComponent
         $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
-        return Suppliers::query()
-            ->select('suppliers.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY suppliers.'.$sortField.' '.$sortDirection.') AS no');
+        return Supplier::query()
+            ->select('Supplier.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY Supplier.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -55,7 +55,7 @@ final class SuppliersTable extends PowerGridComponent
             ->add('contact_id')
             ->add('status')
             ->add('address')
-            ->add('created_at_formatted', fn (Suppliers $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
+            ->add('created_at_formatted', fn (Supplier $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
     }
 
     public function columns(): array
@@ -86,20 +86,20 @@ final class SuppliersTable extends PowerGridComponent
         ];
     }
 
-    #[On(SuppliersForm::EDIT_EVENT)]
+    #[On(SupplierForm::EDIT_EVENT)]
     public function edit(int $rowId): void
     {
-        $this->dispatch('open-dynamic-modal', config: SuppliersForm::make(
+        $this->dispatch('open-dynamic-modal', config: SupplierForm::make(
             title: 'Edit Supplier',
             modelId: $rowId,
             successMessage: 'Data supplier berhasil diperbarui.',
         ))->to(DynamicModalForm::class);
     }
 
-    #[On(SuppliersForm::DELETE_EVENT)]
+    #[On(SupplierForm::DELETE_EVENT)]
     public function delete(int $rowId): void
     {
-        $supplier = Suppliers::findOrFail($rowId);
+        $supplier = Supplier::findOrFail($rowId);
         $supplier->delete();
 
         Flux::toast(
@@ -110,19 +110,19 @@ final class SuppliersTable extends PowerGridComponent
         $this->dispatch('$commit')->self();
     }
 
-    public function actions(Suppliers $row): array
+    public function actions(Supplier $row): array
     {
         return [
             Button::add('edit')
                 ->slot('Edit')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch(SuppliersForm::EDIT_EVENT, ['rowId' => $row->id]),
+                ->dispatch(SupplierForm::EDIT_EVENT, ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
                 ->class('pg-btn-white dark:ring-pg-red-600 dark:border-pg-red-600 dark:hover:bg-pg-red-700 dark:ring-offset-pg-red-800 dark:text-pg-red-300 dark:bg-pg-red-700')
                 ->confirm('Are you sure you want to delete this supplier?')
-                ->dispatch(SuppliersForm::DELETE_EVENT, ['rowId' => $row->id]),
+                ->dispatch(SupplierForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];
     }
 }

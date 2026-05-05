@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire\ProductCategories;
+namespace App\Livewire\ProductCategory;
 
 use App\Livewire\DynamicModalForm;
-use App\Models\ProductCategories;
-use App\Support\Forms\ProductCategoriesForm;
+use App\Models\ProductCategory;
+use App\Support\Forms\ProductCategoryForm;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -16,9 +16,9 @@ use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
-final class ProductCategoriesTable extends PowerGridComponent
+final class ProductCategoryTable extends PowerGridComponent
 {
-    public string $tableName = 'productCategoriesTable';
+    public string $tableName = 'ProductCategoryTable';
 
     public function setUp(): array
     {
@@ -35,7 +35,7 @@ final class ProductCategoriesTable extends PowerGridComponent
         $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
-        return ProductCategories::query()
+        return ProductCategory::query()
             ->select('product_categories.*')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY product_categories.'.$sortField.' '.$sortDirection.') AS no');
     }
@@ -52,7 +52,7 @@ final class ProductCategoriesTable extends PowerGridComponent
             ->add('code')
             ->add('name')
             ->add('status')
-            ->add('created_at_formatted', fn (ProductCategories $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
+            ->add('created_at_formatted', fn (ProductCategory $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
     }
 
     public function columns(): array
@@ -77,20 +77,20 @@ final class ProductCategoriesTable extends PowerGridComponent
         ];
     }
 
-    #[On(ProductCategoriesForm::EDIT_EVENT)]
+    #[On(ProductCategoryForm::EDIT_EVENT)]
     public function edit(int $rowId): void
     {
-        $this->dispatch('open-dynamic-modal', config: ProductCategoriesForm::make(
+        $this->dispatch('open-dynamic-modal', config: ProductCategoryForm::make(
             title: 'Edit Product Category',
             modelId: $rowId,
             successMessage: 'Data kategori produk berhasil diperbarui.',
         ))->to(DynamicModalForm::class);
     }
 
-    #[On(ProductCategoriesForm::DELETE_EVENT)]
+    #[On(ProductCategoryForm::DELETE_EVENT)]
     public function delete(int $rowId): void
     {
-        $productCategory = ProductCategories::findOrFail($rowId);
+        $productCategory = ProductCategory::findOrFail($rowId);
         $productCategory->delete();
 
         Flux::toast(
@@ -101,19 +101,19 @@ final class ProductCategoriesTable extends PowerGridComponent
         $this->dispatch('$commit')->self();
     }
 
-    public function actions(ProductCategories $row): array
+    public function actions(ProductCategory $row): array
     {
         return [
             Button::add('edit')
                 ->slot('Edit')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch(ProductCategoriesForm::EDIT_EVENT, ['rowId' => $row->id]),
+                ->dispatch(ProductCategoryForm::EDIT_EVENT, ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
                 ->class('pg-btn-white dark:ring-pg-red-600 dark:border-pg-red-600 dark:hover:bg-pg-red-700 dark:ring-offset-pg-red-800 dark:text-pg-red-300 dark:bg-pg-red-700')
                 ->confirm('Are you sure you want to delete this product category?')
-                ->dispatch(ProductCategoriesForm::DELETE_EVENT, ['rowId' => $row->id]),
+                ->dispatch(ProductCategoryForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];
     }
 }

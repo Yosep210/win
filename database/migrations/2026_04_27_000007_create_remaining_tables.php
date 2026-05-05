@@ -160,7 +160,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('suppliers', function (Blueprint $table) {
+        Schema::create('Supplier', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100)->unique();
             $table->string('email', 50)->nullable();
@@ -237,7 +237,7 @@ return new class extends Migration
         Schema::dropIfExists('video_progress');
         Schema::dropIfExists('videos');
         Schema::dropIfExists('upgrades');
-        Schema::dropIfExists('suppliers');
+        Schema::dropIfExists('Supplier');
         Schema::dropIfExists('staff');
         Schema::dropIfExists('options');
         Schema::dropIfExists('notification_logs');
