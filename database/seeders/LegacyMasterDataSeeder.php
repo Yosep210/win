@@ -101,6 +101,7 @@ class LegacyMasterDataSeeder extends Seeder
                 case 'jpb_province':
                     $provinces[] = [
                         'id' => (int) $row['id'],
+                        'countrie_id' => '100', // Indonesia
                         'name' => $this->stringOrEmpty($row['province_name']),
                         'code' => $this->nullableString($row['province_code']),
                     ];

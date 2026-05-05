@@ -31,21 +31,46 @@ final class MembershipTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Membership::query();
+        $allowedSorts = ['user_id', 'package_id', 'rank_id', 'as_stockist', 'is_stockist_central', 'stockist_name', 'stockist_province_id', 'stockist_city_id', 'stockist_district_id', 'stockist_village', 'wd_status', 'wd_min', 'is_ro_enabled', 'joined_at', 'upgraded_at', 'stockist_at', 'last_ro_at', 'created_at'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        return Membership::query()
+            ->with(['user', 'package', 'rank'])
+            ->select('memberships.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY memberships.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
     {
-        return [];
+        return [
+            'user' => [
+                'name',
+                'username',
+                'email',
+            ],
+            'package' => [
+                'name',
+                'code',
+            ],
+            'rank' => [
+                'name',
+                'code',
+            ],
+        ];
     }
 
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
-            ->add('id')
-            ->add('user_id')
-            ->add('package_id')
-            ->add('rank_id')
+            ->add('no')
+            ->add('user_name', fn (Membership $model) => $model->user?->name ?? '-')
+            ->add('user_username', fn (Membership $model) => $model->user?->username ?? '-')
+            ->add('user_email', fn (Membership $model) => $model->user?->email ?? '-')
+            ->add('package_name', fn (Membership $model) => $model->package?->name ?? '-')
+            ->add('package_code', fn (Membership $model) => $model->package?->code ?? '-')
+            ->add('rank_name', fn (Membership $model) => $model->rank?->name ?? '-')
+            ->add('rank_code', fn (Membership $model) => $model->rank?->code ?? '-')
             ->add('as_stockist')
             ->add('is_stockist_central')
             ->add('stockist_name')
@@ -67,10 +92,14 @@ final class MembershipTable extends PowerGridComponent
     public function columns(): array
     {
         return [
-            Column::make('Id', 'id'),
-            Column::make('User id', 'user_id'),
-            Column::make('Package id', 'package_id'),
-            Column::make('Rank id', 'rank_id'),
+            Column::make('#', 'no'),
+            Column::make('User Name', 'user_name')->sortable(),
+            Column::make('Username', 'user_username')->sortable(),
+            Column::make('Email', 'user_email')->sortable(),
+            Column::make('Package', 'package_name')->sortable(),
+            Column::make('Package Code', 'package_code')->sortable(),
+            Column::make('Rank', 'rank_name')->sortable(),
+            Column::make('Rank Code', 'rank_code')->sortable(),
             Column::make('As stockist', 'as_stockist')->sortable(),
             Column::make('Is stockist central', 'is_stockist_central')->sortable(),
             Column::make('Stockist name', 'stockist_name')->sortable(),
@@ -94,6 +123,15 @@ final class MembershipTable extends PowerGridComponent
     public function filters(): array
     {
         return [
+            Filter::inputText('user_name')->operators(['contains']),
+            Filter::inputText('user_username')->operators(['contains']),
+            Filter::inputText('user_email')->operators(['contains']),
+            Filter::inputText('package_name')->operators(['contains']),
+            Filter::inputText('package_code')->operators(['contains']),
+            Filter::inputText('rank_name')->operators(['contains']),
+            Filter::inputText('rank_code')->operators(['contains']),
+            Filter::inputText('stockist_name')->operators(['contains']),
+            Filter::inputText('wd_status')->operators(['contains']),
             Filter::datetimepicker('joined_at'),
             Filter::datetimepicker('upgraded_at'),
             Filter::datetimepicker('stockist_at'),

@@ -42,7 +42,11 @@ final class ProvinceTable extends PowerGridComponent
 
     public function relationSearch(): array
     {
-        return [];
+        return [
+            'country' => [
+                'name',
+            ],
+        ];
     }
 
     public function fields(): PowerGridFields
@@ -68,6 +72,7 @@ final class ProvinceTable extends PowerGridComponent
     public function filters(): array
     {
         return [
+            Filter::InputText('country_name')->operators(['contains']),
             Filter::InputText('name')->operators(['contains']),
             Filter::InputText('code')->operators(['contains']),
         ];

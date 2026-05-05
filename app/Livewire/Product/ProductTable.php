@@ -43,7 +43,11 @@ final class ProductTable extends PowerGridComponent
 
     public function relationSearch(): array
     {
-        return [];
+        return [
+            'category' => [
+                'name',
+            ],
+        ];
     }
 
     public function fields(): PowerGridFields
@@ -75,6 +79,7 @@ final class ProductTable extends PowerGridComponent
     public function filters(): array
     {
         return [
+            Filter::inputText('category_name')->operators(['contains']),
             Filter::inputText('code')->operators(['contains']),
             Filter::inputText('name')->operators(['contains']),
             Filter::inputText('description')->operators(['contains']),

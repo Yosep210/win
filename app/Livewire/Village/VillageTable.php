@@ -34,21 +34,24 @@ final class VillageTable extends PowerGridComponent
         $sortField = in_array($this->sortField, $alowedSorts) ? $this->sortField : 'id';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
-        return Village::query()
-            ->select('villages.*')
+        return Village::query()->with('district')->select('villages.*')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY villages.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
     {
-        return [];
+        return [
+            'district' => [
+                'name',
+            ],
+        ];
     }
 
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('district_id')
+            ->add('district_name', fn (Village $village) => $village->district?->name ?? '-')
             ->add('name')
             ->add('postal_code')
             ->add('external_id');
@@ -58,7 +61,7 @@ final class VillageTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('District id', 'district_id')->sortable(),
+            Column::make('District', 'district_name')->sortable(),
             Column::make('Name', 'name')->sortable(),
             Column::make('Postal code', 'postal_code')->sortable(),
             Column::make('External id', 'external_id')->sortable(),
@@ -69,7 +72,7 @@ final class VillageTable extends PowerGridComponent
     public function filters(): array
     {
         return [
-            Filter::inputText('district_id')->operators(['contains']),
+            Filter::inputText('district_name')->operators(['contains']),
             Filter::inputText('name')->operators(['contains']),
             Filter::inputText('postal_code')->operators(['contains']),
             Filter::inputText('external_id')->operators(['contains']),

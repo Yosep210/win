@@ -43,7 +43,11 @@ final class ProductVariantTable extends PowerGridComponent
 
     public function relationSearch(): array
     {
-        return [];
+        return [
+            'product' => [
+                'name',
+            ],
+        ];
     }
 
     public function fields(): PowerGridFields
@@ -77,6 +81,7 @@ final class ProductVariantTable extends PowerGridComponent
     public function filters(): array
     {
         return [
+            Filter::inputText('product_name')->operators(['contains']),
             Filter::inputText('code')->operators(['contains']),
             Filter::inputText('name')->operators(['contains']),
             Filter::inputText('price')->operators(['contains']),

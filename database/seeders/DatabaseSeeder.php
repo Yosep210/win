@@ -13,7 +13,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(99)->create();
+        // User::factory(99)->create();
+
+        $this->call(LegacyMasterDataSeeder::class);
+        $this->call(ReferenceEwalletSeeder::class);
+        $this->call(RolePermissionSeeder::class);
 
         // User::factory()->create([
         //     'name' => 'Test User',
