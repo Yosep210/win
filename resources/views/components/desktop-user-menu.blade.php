@@ -5,7 +5,7 @@
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <flux:tooltip>
-                <flux:button type="submit" icon="arrow-right-start-on-rectangle" class="cursor-pointer mt-1.5 ml-6"
+                <flux:menu.item type="submit" icon="arrow-right-start-on-rectangle" class="cursor-pointer mt-1.5 ml-6"
                     onclick="return confirm('Yakin ingin logout?')" data-test="logout-button" />
                 <flux:tooltip.content>
                     {{ __('Logout') }}

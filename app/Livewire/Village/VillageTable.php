@@ -1,0 +1,119 @@
+<?php
+
+namespace App\Livewire\Village;
+
+use App\Livewire\DynamicModalForm;
+use App\Models\Village;
+use App\Support\Forms\VillageForm;
+use Flux\Flux;
+use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\On;
+use PowerComponents\LivewirePowerGrid\Button;
+use PowerComponents\LivewirePowerGrid\Column;
+use PowerComponents\LivewirePowerGrid\Facades\Filter;
+use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
+use PowerComponents\LivewirePowerGrid\PowerGridComponent;
+use PowerComponents\LivewirePowerGrid\PowerGridFields;
+
+final class VillageTable extends PowerGridComponent
+{
+    public string $tableName = 'villageTable';
+
+    public function setUp(): array
+    {
+        return [
+            PowerGrid::footer()
+                ->showPerPage()
+                ->showRecordCount(),
+        ];
+    }
+
+    public function datasource(): Builder
+    {
+        $alowedSorts = ['id', 'district_id', 'name', 'postal_code', 'external_id'];
+        $sortField = in_array($this->sortField, $alowedSorts) ? $this->sortField : 'id';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        return Village::query()
+            ->select('villages.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY villages.'.$sortField.' '.$sortDirection.') AS no');
+    }
+
+    public function relationSearch(): array
+    {
+        return [];
+    }
+
+    public function fields(): PowerGridFields
+    {
+        return PowerGrid::fields()
+            ->add('no')
+            ->add('district_id')
+            ->add('name')
+            ->add('postal_code')
+            ->add('external_id');
+    }
+
+    public function columns(): array
+    {
+        return [
+            Column::make('#', 'no'),
+            Column::make('District id', 'district_id')->sortable(),
+            Column::make('Name', 'name')->sortable(),
+            Column::make('Postal code', 'postal_code')->sortable(),
+            Column::make('External id', 'external_id')->sortable(),
+            Column::action('Action'),
+        ];
+    }
+
+    public function filters(): array
+    {
+        return [
+            Filter::inputText('district_id')->operators(['contains']),
+            Filter::inputText('name')->operators(['contains']),
+            Filter::inputText('postal_code')->operators(['contains']),
+            Filter::inputText('external_id')->operators(['contains']),
+        ];
+    }
+
+    #[On(VillageForm::EDIT_EVENT)]
+    public function edit($rowId): void
+    {
+        $this->dispatch('open-dynamic-modal', config: VillageForm::make(
+            title: 'Edit Village #'.$rowId,
+            successMessage: 'Data village berhasil diperbarui.',
+            modelId: $rowId,
+        ))
+            ->to(DynamicModalForm::class);
+    }
+
+    #[On(VillageForm::DELETE_EVENT)]
+    public function delete($rowId): void
+    {
+        $village = Village::findOrFail($rowId);
+        $village->delete();
+
+        Flux::toast(
+            variant: 'success',
+            text: 'Data village berhasil dihapus.',
+        );
+
+        $this->dispatch('$commit')->self();
+    }
+
+    public function actions(Village $row): array
+    {
+        return [
+            Button::add('edit')
+                ->slot('Edit')
+                ->id()
+                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->dispatch(VillageForm::EDIT_EVENT, ['rowId' => $row->id]),
+            Button::add('delete')
+                ->slot('Delete')
+                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->confirm('Are you sure you want to delete this village?')
+                ->dispatch(VillageForm::DELETE_EVENT, ['rowId' => $row->id]),
+        ];
+    }
+}

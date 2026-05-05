@@ -3,7 +3,8 @@
         <div class="px-6 py-8 md:px-10">
             <div class="mb-6">
                 <flux:heading size="lg">{{ __('Create Member') }}</flux:heading>
-                <flux:text>{{ __('Samakan data member dengan struktur register lama dan schema baru Laravel.') }}</flux:text>
+                <flux:text>{{ __('Samakan data member dengan struktur register lama dan schema baru Laravel.') }}
+                </flux:text>
             </div>
 
             <form wire:submit="save" class="space-y-8">
@@ -13,18 +14,18 @@
                     </div>
 
                     <div class="grid gap-4 md:grid-cols-2">
-                        <flux:input wire:model="username" :label="__('Username')" type="text" required autocomplete="username"
-                            :placeholder="__('Username')" />
-                        <flux:input wire:model="name" :label="__('Full Name')" type="text" required autofocus autocomplete="name"
-                            :placeholder="__('Full name')" />
-                        <flux:input wire:model="email" :label="__('Email Address')" type="email" required autocomplete="email"
-                            placeholder="email@example.com" />
+                        <flux:input wire:model="username" :label="__('Username')" type="text" required
+                            autocomplete="username" :placeholder="__('Username')" />
+                        <flux:input wire:model="name" :label="__('Full Name')" type="text" required autofocus
+                            autocomplete="name" :placeholder="__('Full name')" />
+                        <flux:input wire:model="email" :label="__('Email Address')" type="email" required
+                            autocomplete="email" placeholder="email@example.com" />
                         <flux:input wire:model="phone" :label="__('Phone / WhatsApp')" type="text" required
                             autocomplete="tel" placeholder="+628123456789" />
                         <flux:input wire:model="password" :label="__('Password')" type="password" required
                             autocomplete="new-password" :placeholder="__('Password')" viewable />
-                        <flux:input wire:model="password_confirmation" :label="__('Confirm Password')" type="password" required
-                            autocomplete="new-password" :placeholder="__('Confirm password')" viewable />
+                        <flux:input wire:model="password_confirmation" :label="__('Confirm Password')" type="password"
+                            required autocomplete="new-password" :placeholder="__('Confirm password')" viewable />
                     </div>
                 </section>
 
@@ -55,7 +56,8 @@
 
                     @if ($provinces->isEmpty())
                     <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                        {{ __('Master wilayah belum tersedia. Anda masih bisa membuat member, tetapi data alamat detail belum dapat dipilih.') }}
+                        {{ __('Master wilayah belum tersedia. Anda masih bisa membuat member, tetapi data alamat detail
+                        belum dapat dipilih.') }}
                     </div>
                     @endif
 
@@ -90,13 +92,11 @@
                     </div>
 
                     <div>
-                        <label class="mb-2 block text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ __('Address') }}</label>
-                        <textarea
-                            wire:model="address"
-                            rows="3"
+                        <label class="mb-2 block text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ __('Address')
+                            }}</label>
+                        <textarea wire:model="address" rows="3"
                             class="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
-                            placeholder="{{ __('Street address, RT/RW, notes, etc.') }}"
-                        ></textarea>
+                            placeholder="{{ __('Street address, RT/RW, notes, etc.') }}"></textarea>
                         @error('address')
                         <div class="mt-1 text-sm text-red-600">{{ $message }}</div>
                         @enderror
@@ -118,7 +118,8 @@
                         <flux:select wire:model="bankId" :label="__('Bank')">
                             <flux:select.option value="">{{ __('Select bank') }}</flux:select.option>
                             @foreach ($banks as $bank)
-                            <flux:select.option value="{{ $bank->id }}">{{ $bank->code }} - {{ $bank->name }}</flux:select.option>
+                            <flux:select.option value="{{ $bank->id }}">{{ $bank->code }} - {{ $bank->name }}
+                            </flux:select.option>
                             @endforeach
                         </flux:select>
                         <flux:input wire:model="accountNumber" :label="__('Account Number')" type="text"
@@ -161,7 +162,8 @@
                 </section>
 
                 <div class="flex items-center justify-between">
-                    <flux:button :href="route('member.index')" type="button" wire:navigate>{{ __('Back') }}</flux:button>
+                    <flux:button :href="route('member.index')" type="button" wire:navigate>{{ __('Back') }}
+                    </flux:button>
                     <flux:button type="submit" variant="primary" wire:loading.attr="disabled" wire:target="save">
                         <span wire:loading.remove wire:target="save">{{ __('Create member') }}</span>
                         <span wire:loading wire:target="save">{{ __('Creating...') }}</span>

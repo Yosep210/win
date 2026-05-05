@@ -43,7 +43,7 @@ return [
         [
             'heading' => 'Master Data',
             'icon' => 'circle-stack',
-            'route' => ['area.*', 'bank.*', 'city.*', 'country.*', 'district.*', 'membership.*', 'package.*', 'province.*', 'rank.*', 'product.*', 'product-category.*', 'product-variant.*', 'suppliers.*'],
+            'route' => ['area.*', 'bank.*', 'city.*', 'country.*', 'district.*', 'membership.*', 'package.*', 'province.*', 'rank.*', 'product.*', 'product-category.*', 'product-variant.*', 'suppliers.*', 'village.*'],
             'sub' => [
                 [
                     'title' => 'Area',
@@ -108,6 +108,23 @@ return [
                 [
                     'title' => 'Suppliers',
                     'href' => 'suppliers.index',
+                    'role' => 'admin',
+                ],
+                [
+                    'title' => 'Village',
+                    'href' => 'village.index',
+                    'role' => 'admin',
+                ],
+            ],
+        ],
+        [
+            'heading' => 'Transactions',
+            'icon' => 'currency-dollar',
+            'route' => ['transaction.*'],
+            'sub' => [
+                [
+                    'title' => 'Transaction List',
+                    'href' => 'dashboard',
                     'role' => 'admin',
                 ],
             ],
