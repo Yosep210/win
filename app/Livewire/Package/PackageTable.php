@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Package;
 
+use App\Livewire\DynamicModalForm;
 use App\Models\Package;
+use App\Support\Forms\PackageForm;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -16,8 +18,6 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class PackageTable extends PowerGridComponent
 {
-    private const EDIT_EVENT = 'package:edit';
-
     public string $tableName = 'packageTable';
 
     public function setUp(): array
@@ -96,20 +96,35 @@ final class PackageTable extends PowerGridComponent
         ];
     }
 
-    #[On(self::EDIT_EVENT)]
+    #[On(PackageForm::EDIT_EVENT)]
     public function edit(int $rowId): void
     {
-        Flux::toast(variant: 'warning', text: "Fitur edit Package belum diimplementasikan. ID: {$rowId}");
+        $config = PackageForm::make('Edit Package', modelId: $rowId);
+        $this->dispatch('open-dynamic-modal', config: $config)->to(DynamicModalForm::class);
+    }
+
+    #[On(PackageForm::DELETE_EVENT)]
+    public function delete(int $rowId): void
+    {
+        Package::findOrFail($rowId)->delete();
+        $this->dispatch(PackageForm::REFRESH_EVENT)->to(self::class);
+        Flux::toast(variant: 'success', text: 'Data package berhasil dihapus.');
     }
 
     public function actions(Package $row): array
     {
         return [
             Button::add('edit')
-                ->slot('Edit: '.$row->id)
+                ->slot('Edit')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch(self::EDIT_EVENT, ['rowId' => $row->id]),
+                ->dispatch(PackageForm::EDIT_EVENT, ['rowId' => $row->id]),
+            Button::add('delete')
+                ->slot('Delete')
+                ->id()
+                ->class('pg-btn-white dark:ring-pg-red-600 dark:border-pg-red-600 dark:hover:bg-pg-red-700 dark:ring-offset-pg-red-800 dark:text-pg-red-300 dark:bg-pg-red-700')
+                ->confirm('Apakah Anda yakin ingin menghapus package ini?')
+                ->dispatch(PackageForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];
     }
 

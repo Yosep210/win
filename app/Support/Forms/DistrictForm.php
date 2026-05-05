@@ -47,7 +47,7 @@ class DistrictForm
                     'name' => 'postal_code',
                     'label' => 'Kode Pos',
                     'type' => 'text',
-                    'validation' => ['required', 'string', 'max:20', 'unique:districts,postal_code,'.($modelId ?? 'NULL').',id'],
+                    'validation' => ['nullable', 'string', 'max:20', 'unique:districts,postal_code,'.($modelId ?? 'NULL').',id'],
                     'placeholder' => 'Masukkan kode pos',
                 ],
                 [

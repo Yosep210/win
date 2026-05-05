@@ -39,14 +39,14 @@ class CityForm
                     'name' => 'name',
                     'label' => 'Nama City',
                     'type' => 'text',
-                    'validation' => ['required', 'string', 'max:255'],
-                    'placeholder' => 'Masukkan nama kota',
+                    'validation' => ['nullable', 'string', 'max:255', 'unique:cities,code,'.($modelId ?? 'NULL').',id'],
+                    'placeholder' => 'Masukkan code kota',
                 ],
                 [
                     'name' => 'type',
                     'label' => 'Type',
                     'type' => 'text',
-                    'validation' => ['required', 'string', 'max:255'],
+                    'validation' => ['nullable', 'string', 'max:255'],
                     'placeholder' => 'Masukkan type kota',
                 ],
                 [

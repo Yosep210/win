@@ -46,7 +46,7 @@ final class ProvinceTable extends PowerGridComponent
         return Province::query()
             ->leftJoin('countries', 'provinces.countrie_id', '=', 'countries.id')
             ->select('provinces.*', 'countries.name as country_name')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY ' . $rowNumberSortField . ' ' . $sortDirection . ') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array

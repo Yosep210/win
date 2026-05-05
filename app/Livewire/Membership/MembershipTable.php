@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Membership;
 
+use App\Livewire\DynamicModalForm;
 use App\Models\Membership;
+use App\Support\Forms\MembershipForm;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -16,8 +18,6 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
 final class MembershipTable extends PowerGridComponent
 {
-    private const EDIT_EVENT = 'membership:edit';
-
     public string $tableName = 'membershipTable';
 
     public function setUp(): array
@@ -179,20 +179,35 @@ final class MembershipTable extends PowerGridComponent
         ];
     }
 
-    #[On(self::EDIT_EVENT)]
+    #[On(MembershipForm::EDIT_EVENT)]
     public function edit(int $rowId): void
     {
-        Flux::toast(variant: 'warning', text: "Fitur edit Membership belum diimplementasikan. ID: {$rowId}");
+        $config = MembershipForm::make('Edit Membership', modelId: $rowId);
+        $this->dispatch('open-dynamic-modal', config: $config)->to(DynamicModalForm::class);
+    }
+
+    #[On(MembershipForm::DELETE_EVENT)]
+    public function delete(int $rowId): void
+    {
+        Membership::findOrFail($rowId)->delete();
+        $this->dispatch(MembershipForm::REFRESH_EVENT)->to(self::class);
+        Flux::toast(variant: 'success', text: 'Data membership berhasil dihapus.');
     }
 
     public function actions(Membership $row): array
     {
         return [
             Button::add('edit')
-                ->slot('Edit: '.$row->id)
+                ->slot('Edit')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch(self::EDIT_EVENT, ['rowId' => $row->id]),
+                ->dispatch(MembershipForm::EDIT_EVENT, ['rowId' => $row->id]),
+            Button::add('delete')
+                ->slot('Delete')
+                ->id()
+                ->class('pg-btn-white dark:ring-pg-red-600 dark:border-pg-red-600 dark:hover:bg-pg-red-700 dark:ring-offset-pg-red-800 dark:text-pg-red-300 dark:bg-pg-red-700')
+                ->confirm('Apakah Anda yakin ingin menghapus membership ini?')
+                ->dispatch(MembershipForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];
     }
 }
