@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['iso', 'name', 'nice_name', 'iso3', 'num_code', 'phone_code', 'status'])]
+#[Fillable(['iso', 'name', 'nice_name', 'iso3', 'numcode', 'phone_code', 'status'])]
 class Country extends Model
 {
     public $timestamps = false;
@@ -14,7 +14,7 @@ class Country extends Model
     protected function casts(): array
     {
         return [
-            'num_code' => 'integer',
+            'numcode' => 'integer',
             'phone_code' => 'integer',
             'status' => 'boolean',
         ];
@@ -22,7 +22,7 @@ class Country extends Model
 
     public function provinces(): HasMany
     {
-        return $this->hasMany(Province::class, 'countrie_id');
+        return $this->hasMany(Province::class, 'country_id');
     }
 
     public static function countryCount(): int

@@ -53,16 +53,17 @@ return new class extends Migration
             $table->string('name');
             $table->string('nice_name');
             $table->char('iso3', 3)->nullable()->index();
-            $table->unsignedSmallInteger('num_code')->nullable();
+            $table->unsignedSmallInteger('numcode')->nullable();
             $table->unsignedInteger('phone_code')->default(0);
             $table->boolean('status')->default(true)->index();
         });
 
         Schema::create('provinces', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('countrie_id')->constrained('countries')->cascadeOnDelete();
+            $table->foreignId('country_id')->constrained('countries')->cascadeOnDelete();
             $table->string('name');
             $table->string('code')->nullable()->index();
+            $table->timestamps();
         });
 
         Schema::create('cities', function (Blueprint $table) {
@@ -73,6 +74,7 @@ return new class extends Migration
             $table->string('code')->nullable()->index();
             $table->string('postal_code', 10)->nullable();
             $table->string('external_id')->nullable()->index();
+            $table->timestamps();
         });
 
         Schema::create('districts', function (Blueprint $table) {
@@ -81,6 +83,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('postal_code', 10)->nullable();
             $table->string('external_id')->nullable()->index();
+            $table->timestamps();
         });
 
         Schema::create('villages', function (Blueprint $table) {
@@ -89,6 +92,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('postal_code', 10)->nullable();
             $table->string('external_id')->nullable()->index();
+            $table->timestamps();
         });
     }
 

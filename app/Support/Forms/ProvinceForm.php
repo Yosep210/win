@@ -26,7 +26,7 @@ class ProvinceForm
             'successMessage' => $successMessage,
             'fields' => [
                 [
-                    'name' => 'countrie_id',
+                    'name' => 'country_id',
                     'label' => 'Country',
                     'type' => 'select',
                     'options' => Country::query()->select('id', 'name')->get()->toArray(),

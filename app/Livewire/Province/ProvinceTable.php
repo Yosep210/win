@@ -44,9 +44,9 @@ final class ProvinceTable extends PowerGridComponent
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Province::query()
-            ->leftJoin('countries', 'provinces.countrie_id', '=', 'countries.id')
+            ->leftJoin('countries', 'provinces.country_id', '=', 'countries.id')
             ->select('provinces.*', 'countries.name as country_name')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY ' . $rowNumberSortField . ' ' . $sortDirection . ') AS no');
     }
 
     public function relationSearch(): array

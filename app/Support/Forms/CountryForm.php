@@ -26,7 +26,7 @@ class CountryForm
             'validationMessages' => [
                 'data.iso.unique' => 'ISO sudah digunakan.',
                 'data.iso3.unique' => 'ISO3 sudah digunakan.',
-                'data.num_code.unique' => 'Kode numerik sudah digunakan.',
+                'data.numcode.unique' => 'Kode numerik sudah digunakan.',
                 'data.phone_code.unique' => 'Kode telepon sudah digunakan.',
             ],
             'fields' => [
@@ -34,7 +34,7 @@ class CountryForm
                     'name' => 'iso',
                     'label' => 'ISO',
                     'type' => 'text',
-                    'validation' => ['required', 'string', 'size:2', 'unique:countries,iso,'.($modelId ?? 'NULL').',id'],
+                    'validation' => ['required', 'string', 'size:2', 'unique:countries,iso,' . ($modelId ?? 'NULL') . ',id'],
                     'placeholder' => 'Masukkan ISO',
                 ],
                 [
@@ -55,21 +55,21 @@ class CountryForm
                     'name' => 'iso3',
                     'label' => 'ISO3',
                     'type' => 'text',
-                    'validation' => ['nullable', 'string', 'size:3', 'unique:countries,iso3,'.($modelId ?? 'NULL').',id'],
+                    'validation' => ['nullable', 'string', 'size:3', 'unique:countries,iso3,' . ($modelId ?? 'NULL') . ',id'],
                     'placeholder' => 'Masukkan ISO3',
                 ],
                 [
-                    'name' => 'num_code',
+                    'name' => 'numcode',
                     'label' => 'Kode Numerik',
                     'type' => 'number',
-                    'validation' => ['nullable', 'integer', 'min:0', 'max:65535', 'unique:countries,num_code,'.($modelId ?? 'NULL').',id'],
+                    'validation' => ['nullable', 'integer', 'min:0', 'max:65535', 'unique:countries,numcode,' . ($modelId ?? 'NULL') . ',id'],
                     'placeholder' => 'Masukkan kode numerik country',
                 ],
                 [
                     'name' => 'phone_code',
                     'label' => 'Kode Telepon',
                     'type' => 'number',
-                    'validation' => ['required', 'integer', 'min:0', 'unique:countries,phone_code,'.($modelId ?? 'NULL').',id'],
+                    'validation' => ['required', 'integer', 'min:0', 'unique:countries,phone_code,' . ($modelId ?? 'NULL') . ',id'],
                     'placeholder' => 'Masukkan kode telepon',
                 ],
                 [

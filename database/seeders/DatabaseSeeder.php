@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(99)->create();
 
+        $this->call(CountrySeeder::class);
+        $this->call(IndonesianWilayahSeeder::class);
         $this->call(LegacyMasterDataSeeder::class);
         $this->call(ReferenceEwalletSeeder::class);
         $this->call(RolePermissionSeeder::class);

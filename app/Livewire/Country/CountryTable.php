@@ -30,13 +30,13 @@ final class CountryTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['id', 'iso', 'name', 'nice_name', 'iso3', 'num_code', 'phone_code', 'status'];
+        $allowedSorts = ['id', 'iso', 'name', 'nice_name', 'iso3', 'numcode', 'phone_code', 'status'];
         $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Country::query()
             ->select('countries.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY countries.'.$sortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY countries.' . $sortField . ' ' . $sortDirection . ') AS no');
     }
 
     public function relationSearch(): array
@@ -52,7 +52,7 @@ final class CountryTable extends PowerGridComponent
             ->add('name')
             ->add('nice_name')
             ->add('iso3')
-            ->add('num_code')
+            ->add('numcode')
             ->add('phone_code')
             ->add('status');
     }
@@ -65,7 +65,7 @@ final class CountryTable extends PowerGridComponent
             Column::make('Name', 'name')->sortable(),
             Column::make('Nice name', 'nice_name')->sortable(),
             Column::make('Iso3', 'iso3')->sortable(),
-            Column::make('Num code', 'num_code')->sortable(),
+            Column::make('Num code', 'numcode')->sortable(),
             Column::make('Phone code', 'phone_code')->sortable(),
             Column::make('Status', 'status')->sortable(),
             Column::action('Action'),
@@ -79,7 +79,7 @@ final class CountryTable extends PowerGridComponent
             Filter::InputText('name')->operators(['contains']),
             Filter::InputText('nice_name')->operators(['contains']),
             Filter::InputText('iso3')->operators(['contains']),
-            Filter::InputText('num_code')->operators(['contains']),
+            Filter::InputText('numcode')->operators(['contains']),
             Filter::InputText('phone_code')->operators(['contains']),
         ];
     }
