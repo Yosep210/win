@@ -37,9 +37,9 @@ final class UserTable extends PowerGridComponent
 
         return User::query()
             ->with('roles')
-            ->withoutRole(['admin', 'staff'])
+            // ->withoutRole(['admin', 'staff'])
             ->select('users.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY users.'.$sortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY users.' . $sortField . ' ' . $sortDirection . ') AS no');
     }
 
     public function relationSearch(): array
@@ -54,8 +54,8 @@ final class UserTable extends PowerGridComponent
             ->add('name')
             ->add('username')
             ->add('email')
-            ->add('roles', fn (User $user) => $user->roles->pluck('name')->join(', '))
-            ->add('created_at_formatted', fn (User $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
+            ->add('roles', fn(User $user) => $user->roles->pluck('name')->join(', '))
+            ->add('created_at_formatted', fn(User $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
     }
 
     public function columns(): array
@@ -105,6 +105,16 @@ final class UserTable extends PowerGridComponent
         }
 
         return [
+            Button::add('show')
+                ->slot('Show')
+                ->id()
+                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->route('member.show', ['user' => $row->id]),
+            Button::add('edit')
+                ->slot('Edit')
+                ->id()
+                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->route('member.edit', ['user' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')

@@ -14,6 +14,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::livewire('district', Livewire\District\Index::class)->name('district.index');
     Route::livewire('members/create', Livewire\Member\Create::class)->name('member.create');
     Route::livewire('members', Livewire\Member\Index::class)->name('member.index');
+    Route::get('members/{user}', Livewire\Member\Show::class)->name('member.show');
+    Route::get('members/{user}/edit', Livewire\Member\Edit::class)->name('member.edit');
     Route::livewire('membership', Livewire\Membership\Index::class)->name('membership.index');
     Route::livewire('package', Livewire\Package\Index::class)->name('package.index');
     Route::livewire('province', Livewire\Province\Index::class)->name('province.index');

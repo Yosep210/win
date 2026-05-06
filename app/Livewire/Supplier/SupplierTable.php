@@ -37,7 +37,7 @@ final class SupplierTable extends PowerGridComponent
 
         return Supplier::query()
             ->select('supplier.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY supplier.' . $sortField . ' ' . $sortDirection . ') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY supplier.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -55,7 +55,7 @@ final class SupplierTable extends PowerGridComponent
             ->add('contact_id')
             ->add('status')
             ->add('address')
-            ->add('created_at_formatted', fn(Supplier $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
+            ->add('created_at_formatted', fn (Supplier $model) => Carbon::parse($model->created_at)->format('d M Y H:i'));
     }
 
     public function columns(): array

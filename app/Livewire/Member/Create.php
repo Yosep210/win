@@ -2,20 +2,7 @@
 
 namespace App\Livewire\Member;
 
-use App\Concerns\PasswordValidationRules;
-use App\Concerns\ProfileValidationRules;
-use App\Models\Bank;
-use App\Models\BankAccount;
-use App\Models\City;
-use App\Models\Country;
-use App\Models\District;
-use App\Models\Membership;
-use App\Models\Package;
-use App\Models\Province;
-use App\Models\User;
-use App\Models\UserNetwork;
-use App\Models\UserProfile;
-use App\Models\Village;
+use App\Models;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,8 +13,8 @@ use Livewire\Component;
 
 class Create extends Component
 {
-    use PasswordValidationRules;
-    use ProfileValidationRules;
+    use App\Concerns\PasswordValidationRules;
+    use App\Concerns\ProfileValidationRules;
 
     public string $name = '';
 
@@ -79,9 +66,9 @@ class Create extends Component
 
     public function mount(): void
     {
-        $this->countryId = Country::query()
+        $this->countryId = Models\Country::query()
             ->where('iso', 'id')
-            ->value('id') ?? Country::query()->value('id');
+            ->value('id') ?? Models\Country::query()->value('id');
     }
 
     public function updatedProvinceId(): void
@@ -104,14 +91,14 @@ class Create extends Component
 
     public function updatedSponsorUsername(): void
     {
-        $this->sponsorName = User::query()
+        $this->sponsorName = Models\User::query()
             ->where('username', $this->sponsorUsername)
             ->value('name') ?? '';
     }
 
     protected function provinces(): Collection
     {
-        return Province::query()
+        return Models\Province::query()
             ->orderBy('name')
             ->get();
     }
@@ -122,7 +109,7 @@ class Create extends Component
             return new Collection;
         }
 
-        return City::query()
+        return Models\City::query()
             ->where('province_id', $this->provinceId)
             ->orderBy('name')
             ->get();
@@ -134,7 +121,7 @@ class Create extends Component
             return new Collection;
         }
 
-        return District::query()
+        return Models\District::query()
             ->where('city_id', $this->cityId)
             ->orderBy('name')
             ->get();
@@ -146,7 +133,7 @@ class Create extends Component
             return new Collection;
         }
 
-        return Village::query()
+        return Models\Village::query()
             ->where('district_id', $this->districtId)
             ->orderBy('name')
             ->get();
@@ -154,7 +141,7 @@ class Create extends Component
 
     protected function banks(): Collection
     {
-        return Bank::query()
+        return Models\Bank::query()
             ->where('status', true)
             ->orderBy('name')
             ->get();
@@ -162,7 +149,7 @@ class Create extends Component
 
     protected function packages(): Collection
     {
-        return Package::query()
+        return Models\Package::query()
             ->where('is_active', true)
             ->where('is_register', true)
             ->orderBy('name')
@@ -171,9 +158,9 @@ class Create extends Component
 
     protected function formRules(): array
     {
-        $hasProvinceOptions = Province::query()->exists();
-        $hasBankOptions = Bank::query()->where('status', true)->exists();
-        $hasPackageOptions = Package::query()
+        $hasProvinceOptions = Models\Province::query()->exists();
+        $hasBankOptions = Models\Bank::query()->where('status', true)->exists();
+        $hasPackageOptions = Models\Package::query()
             ->where('is_active', true)
             ->where('is_register', true)
             ->exists();
@@ -242,7 +229,7 @@ class Create extends Component
             return null;
         }
 
-        return User::query()
+        return Models\User::query()
             ->where('username', $this->sponsorUsername)
             ->first();
     }
@@ -253,7 +240,7 @@ class Create extends Component
             return $user->id;
         }
 
-        $sponsorNetwork = UserNetwork::query()
+        $sponsorNetwork = Models\UserNetwork::query()
             ->where('user_id', $sponsor->id)
             ->first();
 
@@ -264,7 +251,7 @@ class Create extends Component
     {
         do {
             $code = Str::upper(Str::random(10));
-        } while (User::query()->where('referral_code', $code)->exists());
+        } while (Models\User::query()->where('referral_code', $code)->exists());
 
         return $code;
     }
@@ -281,14 +268,14 @@ class Create extends Component
             return;
         }
 
-        if (User::query()->where('phone', $phone)->exists()) {
+        if (Models\User::query()->where('phone', $phone)->exists()) {
             $this->addError('phone', 'The phone has already been taken.');
 
             return;
         }
 
         DB::transaction(function () use ($validated, $phone, $sponsor): void {
-            $user = User::create([
+            $user = Models\User::create([
                 'name' => $validated['name'],
                 'username' => Str::lower($validated['username']),
                 'email' => Str::lower($validated['email']),
@@ -302,7 +289,7 @@ class Create extends Component
 
             $user->assignRole('member');
 
-            UserProfile::create([
+            Models\UserProfile::create([
                 'user_id' => $user->id,
                 'gender' => $validated['gender'],
                 'birth_date' => $validated['birthDate'],
@@ -316,7 +303,7 @@ class Create extends Component
                 'village_id' => $validated['villageId'] ?: null,
             ]);
 
-            Membership::create([
+            Models\Membership::create([
                 'user_id' => $user->id,
                 'package_id' => $validated['packageId'] ?: null,
                 'as_stockist' => $validated['asStockist'],
@@ -327,7 +314,7 @@ class Create extends Component
             ]);
 
             if ($validated['bankId'] && $validated['accountNumber'] && $validated['accountName']) {
-                BankAccount::create([
+                Models\BankAccount::create([
                     'user_id' => $user->id,
                     'bank_id' => $validated['bankId'],
                     'account_number' => $validated['accountNumber'],
@@ -336,7 +323,7 @@ class Create extends Component
                 ]);
             }
 
-            UserNetwork::create([
+            Models\UserNetwork::create([
                 'user_id' => $user->id,
                 'sponsor_id' => $sponsor?->id,
                 'parent_id' => null,
@@ -372,9 +359,9 @@ class Create extends Component
             'sponsorName',
         ]);
 
-        $this->countryId = Country::query()
+        $this->countryId = Models\Country::query()
             ->where('iso', 'id')
-            ->value('id') ?? Country::query()->value('id');
+            ->value('id') ?? Models\Country::query()->value('id');
         $this->asStockist = 'member';
         $this->isStockistCentral = false;
         $this->resetValidation();
