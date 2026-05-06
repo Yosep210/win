@@ -12,11 +12,7 @@ class Show extends Component
 
     public function mount(User $user): void
     {
-        $this->user = $user->load([
-            $this->profile(),
-            $this->membership(),
-            $this->network(),
-        ]);
+        $this->user = $user->load(['profile', 'membership.package', 'bankAccounts', 'network']);
     }
 
     public function render(): View

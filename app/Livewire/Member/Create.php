@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Member;
 
+use App\Concerns\PasswordValidationRules;
+use App\Concerns\ProfileValidationRules;
 use App\Models;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
@@ -13,8 +15,8 @@ use Livewire\Component;
 
 class Create extends Component
 {
-    use App\Concerns\PasswordValidationRules;
-    use App\Concerns\ProfileValidationRules;
+    use PasswordValidationRules;
+    use ProfileValidationRules;
 
     public string $name = '';
 
@@ -213,11 +215,11 @@ class Create extends Component
         }
 
         if (str_starts_with($phone, '0')) {
-            return '+62'.substr($phone, 1);
+            return '+62' . substr($phone, 1);
         }
 
         if (! str_starts_with($phone, '+')) {
-            return '+'.$phone;
+            return '+' . $phone;
         }
 
         return $phone;
