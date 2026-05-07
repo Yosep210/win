@@ -36,7 +36,7 @@ final class CountryTable extends PowerGridComponent
 
         return Country::query()
             ->select('countries.*')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY countries.' . $sortField . ' ' . $sortDirection . ') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY countries.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array

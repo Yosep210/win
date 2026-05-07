@@ -25,9 +25,9 @@ class LegacyMasterDataSeeder extends Seeder
         $areas = [];
         $banks = [];
         // $countries = [];
-        $provinces = [];
-        $cities = [];
-        $districts = [];
+        // $provinces = [];
+        // $cities = [];
+        // $districts = [];
         $packages = [];
         $settings = [];
         $options = [];
@@ -85,49 +85,49 @@ class LegacyMasterDataSeeder extends Seeder
                     ];
                     break;
 
-                // case 'jpb_country':
-                //     $countries[] = [
-                //         'id' => (int) $row['id'],
-                //         'iso' => Str::lower($this->stringOrEmpty($row['iso'])),
-                //         'name' => $this->stringOrEmpty($row['name']),
-                //         'nice_name' => $this->stringOrEmpty($row['nicename']),
-                //         'iso3' => $this->nullableString($row['iso3']),
-                //         'numcode' => $this->nullableInt($row['numcode']),
-                //         'phone_code' => (int) ($row['phonecode'] ?? 0),
-                //         'status' => (bool) ($row['status'] ?? false),
-                //     ];
-                //     break;
+                    // case 'jpb_country':
+                    //     $countries[] = [
+                    //         'id' => (int) $row['id'],
+                    //         'iso' => Str::lower($this->stringOrEmpty($row['iso'])),
+                    //         'name' => $this->stringOrEmpty($row['name']),
+                    //         'nice_name' => $this->stringOrEmpty($row['nicename']),
+                    //         'iso3' => $this->nullableString($row['iso3']),
+                    //         'numcode' => $this->nullableInt($row['numcode']),
+                    //         'phone_code' => (int) ($row['phonecode'] ?? 0),
+                    //         'status' => (bool) ($row['status'] ?? false),
+                    //     ];
+                    //     break;
 
-                case 'jpb_province':
-                    $provinces[] = [
-                        'id' => (int) $row['id'],
-                        'country_id' => '100', // Indonesia
-                        'name' => $this->stringOrEmpty($row['province_name']),
-                        'code' => $this->nullableString($row['province_code']),
-                    ];
-                    break;
+                    // case 'jpb_province':
+                    //     $provinces[] = [
+                    //         'id' => (int) $row['id'],
+                    //         'country_id' => '100', // Indonesia
+                    //         'name' => $this->stringOrEmpty($row['province_name']),
+                    //         'code' => $this->nullableString($row['province_code']),
+                    //     ];
+                    //     break;
 
-                case 'jpb_district':
-                    $cities[] = [
-                        'id' => (int) $row['id'],
-                        'province_id' => (int) $row['province_id'],
-                        'name' => $this->stringOrEmpty($row['district_name']),
-                        'type' => $this->nullableString($row['district_type']),
-                        'code' => $this->nullableString($row['district_code']),
-                        'postal_code' => $this->nullableString($row['postal_code']),
-                        'external_id' => $this->nullableString($row['id_express']),
-                    ];
-                    break;
+                    // case 'jpb_district':
+                    //     $cities[] = [
+                    //         'id' => (int) $row['id'],
+                    //         'province_id' => (int) $row['province_id'],
+                    //         'name' => $this->stringOrEmpty($row['district_name']),
+                    //         'type' => $this->nullableString($row['district_type']),
+                    //         'code' => $this->nullableString($row['district_code']),
+                    //         'postal_code' => $this->nullableString($row['postal_code']),
+                    //         'external_id' => $this->nullableString($row['id_express']),
+                    //     ];
+                    //     break;
 
-                case 'jpb_subdistrict':
-                    $districts[] = [
-                        'id' => (int) $row['id'],
-                        'city_id' => (int) $row['district_id'],
-                        'name' => $this->stringOrEmpty($row['subdistrict_name']),
-                        'postal_code' => null,
-                        'external_id' => $this->nullableString($row['id_express']),
-                    ];
-                    break;
+                    // case 'jpb_subdistrict':
+                    //     $districts[] = [
+                    //         'id' => (int) $row['id'],
+                    //         'city_id' => (int) $row['district_id'],
+                    //         'name' => $this->stringOrEmpty($row['subdistrict_name']),
+                    //         'postal_code' => null,
+                    //         'external_id' => $this->nullableString($row['id_express']),
+                    //     ];
+                    //     break;
 
                 case 'jpb_package':
                     $packages[] = [
@@ -176,7 +176,7 @@ class LegacyMasterDataSeeder extends Seeder
                     $type = $this->nullableString($row['type']) ?: 'uncategorized';
 
                     if (! isset($categoryIds[$type])) {
-                        $categoryCode = 'legacy-' . Str::slug($type, '-');
+                        $categoryCode = 'legacy-'.Str::slug($type, '-');
                         $categoryId = count($categoryIds) + 1;
 
                         $categoryIds[$type] = $categoryId;
@@ -191,7 +191,7 @@ class LegacyMasterDataSeeder extends Seeder
                     }
 
                     $productCode = $this->makeUniqueCode(
-                        Str::lower($this->nullableString($row['sku']) ?: 'legacy-product-' . (int) $row['id']),
+                        Str::lower($this->nullableString($row['sku']) ?: 'legacy-product-'.(int) $row['id']),
                         $usedProductCodes,
                         (string) $row['id']
                     );
@@ -208,7 +208,7 @@ class LegacyMasterDataSeeder extends Seeder
                     ];
 
                     $variantName = $this->nullableString($row['varian']) ?: 'Default';
-                    $variantCode = $this->makeUniqueCode($productCode . '-default', $usedVariantCodes, (string) $row['id']);
+                    $variantCode = $this->makeUniqueCode($productCode.'-default', $usedVariantCodes, (string) $row['id']);
 
                     $productVariants[] = [
                         'id' => (int) $row['id'],
@@ -252,9 +252,9 @@ class LegacyMasterDataSeeder extends Seeder
             $areas,
             $banks,
             // $countries,
-            $provinces,
-            $cities,
-            $districts,
+            // $provinces,
+            // $cities,
+            // $districts,
             $packages,
             $settings,
             $options,
@@ -267,9 +267,9 @@ class LegacyMasterDataSeeder extends Seeder
             $this->upsertChunked('areas', $areas, ['id'], ['name', 'code']);
             $this->upsertChunked('banks', $banks, ['id'], ['code', 'name', 'status', 'updated_at']);
             // $this->upsertChunked('countries', $countries, ['id'], ['iso', 'name', 'nice_name', 'iso3', 'numcode', 'phone_code', 'status']);
-            $this->upsertChunked('provinces', $provinces, ['id'], ['name', 'code']);
-            $this->upsertChunked('cities', $cities, ['id'], ['province_id', 'name', 'type', 'code', 'postal_code', 'external_id']);
-            $this->upsertChunked('districts', $districts, ['id'], ['city_id', 'name', 'postal_code', 'external_id']);
+            // $this->upsertChunked('provinces', $provinces, ['id'], ['name', 'code']);
+            // $this->upsertChunked('cities', $cities, ['id'], ['province_id', 'name', 'type', 'code', 'postal_code', 'external_id']);
+            // $this->upsertChunked('districts', $districts, ['id'], ['city_id', 'name', 'postal_code', 'external_id']);
             $this->upsertChunked('packages', $packages, ['code'], [
                 'name',
                 'sort_order',
@@ -300,20 +300,20 @@ class LegacyMasterDataSeeder extends Seeder
 
         $this->command?->info('Legacy master data import completed.');
         $this->command?->line('Imported or updated:');
-        $this->command?->line('- areas: ' . count($areas));
-        $this->command?->line('- banks: ' . count($banks));
+        $this->command?->line('- areas: '.count($areas));
+        $this->command?->line('- banks: '.count($banks));
         // $this->command?->line('- countries: ' . count($countries));
-        $this->command?->line('- provinces: ' . count($provinces));
-        $this->command?->line('- cities: ' . count($cities));
-        $this->command?->line('- districts: ' . count($districts));
-        $this->command?->line('- packages: ' . count($packages));
-        $this->command?->line('- settings: ' . count($settings));
-        $this->command?->line('- options: ' . count($options));
-        $this->command?->line('- ranks: ' . count($ranks));
-        $this->command?->line('- product categories: ' . count($ProductCategory));
-        $this->command?->line('- products: ' . count($products));
-        $this->command?->line('- product variants: ' . count($productVariants));
-        $this->command?->line('- Supplier: ' . count($Supplier));
+        // $this->command?->line('- provinces: ' . count($provinces));
+        // $this->command?->line('- cities: ' . count($cities));
+        // $this->command?->line('- districts: ' . count($districts));
+        $this->command?->line('- packages: '.count($packages));
+        $this->command?->line('- settings: '.count($settings));
+        $this->command?->line('- options: '.count($options));
+        $this->command?->line('- ranks: '.count($ranks));
+        $this->command?->line('- product categories: '.count($ProductCategory));
+        $this->command?->line('- products: '.count($products));
+        $this->command?->line('- product variants: '.count($productVariants));
+        $this->command?->line('- Supplier: '.count($Supplier));
         $this->command?->warn('Village master data was not imported because the legacy dump does not contain a dedicated village table.');
     }
 
@@ -329,7 +329,7 @@ class LegacyMasterDataSeeder extends Seeder
         }
 
         $columns = array_map(
-            static fn(string $column): string => trim($column, " \t\n\r\0\x0B`"),
+            static fn (string $column): string => trim($column, " \t\n\r\0\x0B`"),
             $this->splitSqlList($matches['columns'])
         );
 
@@ -468,13 +468,13 @@ class LegacyMasterDataSeeder extends Seeder
         $code = $baseCode;
 
         while (isset($usedCodes[$code])) {
-            $code = $baseCode . '-' . Str::slug($suffix, '-');
+            $code = $baseCode.'-'.Str::slug($suffix, '-');
 
             if (! isset($usedCodes[$code])) {
                 break;
             }
 
-            $code .= '-' . count($usedCodes);
+            $code .= '-'.count($usedCodes);
         }
 
         $usedCodes[$code] = true;

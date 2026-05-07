@@ -6,116 +6,194 @@ use App\Models\Country;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class IndonesianWilayahSeeder extends Seeder
 {
-    protected string $baseUrl = 'https://raw.githubusercontent.com/mfitrahrmd/wilayah-indonesia-json/master/';
-
     public function run(): void
     {
-        // 1. Pastikan Indonesia ada di tabel countries dan dapatkan ID-nya
+        // Meningkatkan limit memori dan waktu eksekusi karena data wilayah sangat besar
+        ini_set('memory_limit', '512M');
+        set_time_limit(0);
+
         $indonesia = Country::where('iso', 'id')->first();
-        if (!$indonesia) {
-            $this->command->error("Data negara Indonesia tidak ditemukan. Jalankan CountrySeeder terlebih dahulu.");
+        if (! $indonesia) {
+            $this->command->error('Data negara Indonesia tidak ditemukan.');
+
             return;
         }
 
-        // 2. Import Provinces
-        $this->command->info("Fetching Provinces...");
-        $response = Http::get($this->baseUrl . 'provinces.json');
-        if ($response->successful()) {
-            $provinces = $response->json();
-            $dataProvince = array_map(fn($item) => [
-                'id'         => $item['id'],
-                'country_id' => $indonesia->id,
-                'name'       => $item['name'],
-                'code'       => $item['code'] ?? null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ], $provinces);
+        // Reset tabel agar auto-increment mulai dari 1 lagi
+        Schema::disableForeignKeyConstraints();
+        DB::table('villages')->truncate();
+        DB::table('districts')->truncate();
+        DB::table('cities')->truncate();
+        DB::table('provinces')->truncate();
+        Schema::enableForeignKeyConstraints();
 
-            DB::table('provinces')->upsert($dataProvince, ['id'], ['name', 'updated_at']);
-            $this->command->info("Provinces imported.");
-        }
+        $sources = [
+            ['name' => 'emsifa/api-wilayah', 'base' => 'https://emsifa.github.io/api-wilayah-indonesia/api'],
+        ];
 
-        // 3. Import Cities (Regencies)
-        $this->command->info("Fetching Cities...");
-        $response = Http::get($this->baseUrl . 'regencies.json');
-        if ($response->successful()) {
-            $cities = $response->json();
-            $dataCity = array_map(fn($item) => [
-                'id'          => $item['id'],
-                'province_id' => $item['province_id'],
-                'name'        => $item['name'],
-                'type'        => $item['type'] ?? null,
-                'code'        => $item['code'] ?? null,
-                'postal_code' => $item['postal_code'] ?? null,
-                'external_id' => $item['external_id'] ?? null,
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ], $cities);
-
-            DB::table('cities')->upsert($dataCity, ['id'], ['name', 'province_id', 'updated_at']);
-            $this->command->info("Cities imported.");
-        }
-
-        // 4. Import Districts (Kecamatan)
-        $this->command->info("Fetching Districts...");
-        $response = Http::get($this->baseUrl . 'districts.json');
-        if ($response->successful()) {
-            $districts = $response->json();
-            $dataDistrict = array_map(fn($item) => [
-                'id'          => $item['id'],
-                'city_id'     => $item['regency_id'] ?? $item['city_id'], // Menyesuaikan source JSON
-                'name'        => $item['name'],
-                'postal_code' => $item['postal_code'] ?? null,
-                'external_id' => $item['external_id'] ?? null,
-                'created_at'  => now(),
-                'updated_at'  => now(),
-            ], $districts);
-
-            foreach (array_chunk($dataDistrict, 1000) as $chunk) {
-                DB::table('districts')->upsert($chunk, ['id'], ['name', 'city_id', 'updated_at']);
+        foreach ($sources as $source) {
+            $this->command->info("Trying {$source['name']}...");
+            if ($this->tryImportFromSource($source['base'], $indonesia)) {
+                return;
             }
-            $this->command->info("Districts imported.");
         }
 
-        // 5. Import Villages (Kelurahan/Desa)
-        $this->command->info("Fetching Villages (This might take a while)...");
-        $response = Http::get($this->baseUrl . 'villages.json');
-        if ($response->successful()) {
-            // Karena data Village sangat besar, kita proses dengan hati-hati
-            $villages = $response->json();
+        $this->command->error('❌ All online sources failed. Seeding aborted.');
+    }
 
-            $batch = [];
-            $count = 0;
+    private function tryImportFromSource(string $baseUrl, Country $indonesia): bool
+    {
+        try {
+            $this->command->line("  Fetching provinces from: $baseUrl/provinces.json");
+            $response = Http::withoutVerifying()->timeout(30)->get("$baseUrl/provinces.json");
 
-            foreach ($villages as $item) {
-                $batch[] = [
-                    'id'          => $item['id'],
-                    'district_id' => $item['district_id'],
-                    'name'        => $item['name'],
-                    'postal_code' => $item['postal_code'] ?? null,
-                    'external_id' => $item['external_id'] ?? null,
-                    'created_at'  => now(),
-                    'updated_at'  => now(),
-                ];
+            if (! $response->successful()) {
+                $this->command->warn("  ✗ HTTP {$response->status()}");
 
-                $count++;
+                return false;
+            }
 
-                // Upsert setiap 2000 data agar tidak memberatkan database dan memori
-                if (count($batch) >= 2000) {
-                    DB::table('villages')->upsert($batch, ['id'], ['name', 'district_id', 'updated_at']);
-                    $batch = [];
+            $provinces = $response->json();
+            if (empty($provinces)) {
+                $this->command->warn('  ✗ Empty provinces response');
+
+                return false;
+            }
+
+            $this->command->line('  Got ' . count($provinces) . ' provinces');
+
+            // Cek apakah sumber data menggunakan metode iteratif (github.io) atau file tunggal
+            $isIterative = str_contains($baseUrl, 'github.io');
+
+            if ($isIterative) {
+                foreach ($provinces as $province) {
+                    $this->command->line("    Processing: " . Str::title($province['name']));
+
+                    // Simpan Provinsi dan ambil ID auto-increment-nya
+                    $localProvinceId = DB::table('provinces')->insertGetId([
+                        'country_id' => $indonesia->id,
+                        'name' => Str::title($province['name']),
+                        // 'code' => $province['id'], // Simpan ID asli API di kolom code
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    $resCities = Http::withoutVerifying()->timeout(30)->get("$baseUrl/regencies/{$province['id']}.json");
+                    if ($resCities->successful()) {
+                        $cities = $resCities->json();
+                        foreach ($cities as $city) {
+                            $localCityId = DB::table('cities')->insertGetId([
+                                'province_id' => $localProvinceId,
+                                'name' => Str::title($city['name']),
+                                // 'external_id' => $city['id'],
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+
+                            $resDist = Http::withoutVerifying()->timeout(30)->get("$baseUrl/districts/{$city['id']}.json");
+                            if ($resDist->successful()) {
+                                $districts = $resDist->json();
+                                foreach ($districts as $district) {
+                                    $localDistrictId = DB::table('districts')->insertGetId([
+                                        'city_id' => $localCityId,
+                                        'name' => Str::title($district['name']),
+                                        // 'external_id' => $district['id'],
+                                        'created_at' => now(),
+                                        'updated_at' => now(),
+                                    ]);
+
+                                    $resVil = Http::withoutVerifying()->timeout(30)->get("$baseUrl/villages/{$district['id']}.json");
+                                    if ($resVil->successful()) {
+                                        $villages = $resVil->json();
+                                        $villageData = array_map(fn($v) => [
+                                            'district_id' => $localDistrictId,
+                                            'name' => Str::title($v['name']),
+                                            // 'external_id' => $v['id'],
+                                            'created_at' => now(),
+                                            'updated_at' => now(),
+                                        ], $villages);
+                                        DB::table('villages')->insert($villageData);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Jika bukan iteratif, kita pakai mapping array (lebih cepat tapi memori besar)
+                $this->importProvinces($provinces, $indonesia);
+
+                $resCities = Http::withoutVerifying()->timeout(60)->get("$baseUrl/regencies.json");
+                if ($resCities->successful()) {
+                    $provMap = DB::table('provinces')->pluck('id', 'code')->toArray();
+                    $cityData = array_map(fn($c) => [
+                        'province_id' => $provMap[$c['province_id']] ?? null,
+                        'name' => Str::title($c['name']),
+                        // 'external_id' => $c['id'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ], $resCities->json());
+                    DB::table('cities')->insert($cityData);
+                }
+
+                $resDist = Http::withoutVerifying()->timeout(60)->get("$baseUrl/districts.json");
+                if ($resDist->successful()) {
+                    $cityMap = DB::table('cities')->pluck('id', 'external_id')->toArray();
+                    foreach (array_chunk($resDist->json(), 500) as $chunk) {
+                        $distData = array_map(fn($d) => [
+                            'city_id' => $cityMap[$d['regency_id']] ?? null,
+                            'name' => Str::title($d['name']),
+                            // 'external_id' => $d['id'],
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ], $chunk);
+                        DB::table('districts')->insert($distData);
+                    }
+                }
+
+                $resVil = Http::withoutVerifying()->timeout(600)->get("$baseUrl/villages.json");
+                if ($resVil->successful()) {
+                    $distMap = DB::table('districts')->pluck('id', 'external_id')->toArray();
+                    foreach (array_chunk($resVil->json(), 500) as $chunk) {
+                        $vilData = array_map(fn($v) => [
+                            'district_id' => $distMap[$v['district_id']] ?? null,
+                            'name' => Str::title($v['name']),
+                            // 'external_id' => $v['id'],
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ], $chunk);
+                        DB::table('villages')->insert($vilData);
+                    }
                 }
             }
 
-            // Masukkan sisa data yang belum ter-upsert
-            if (!empty($batch)) {
-                DB::table('villages')->upsert($batch, ['id'], ['name', 'district_id', 'updated_at']);
-            }
+            $this->command->info('✓ Import successful!');
 
-            $this->command->info("Total {$count} Villages imported successfully.");
+            return true;
+        } catch (\Throwable $e) {
+            $this->command->warn('  Error: ' . $e->getMessage());
+
+            return false;
         }
+    }
+
+    private function importProvinces(array $provinces, Country $indonesia): void
+    {
+        $data = array_map(fn($p) => [
+            'country_id' => $indonesia->id,
+            'name' => Str::title($p['name']),
+            // 'code' => $p['id'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ], $provinces);
+
+        DB::table('provinces')->insert($data);
+
+        $this->command->info('  ✓ Provinces: ' . count($data));
     }
 }

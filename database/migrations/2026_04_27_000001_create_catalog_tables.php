@@ -62,7 +62,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('country_id')->constrained('countries')->cascadeOnDelete();
             $table->string('name');
-            $table->string('code')->nullable()->index();
+            // $table->string('code')->nullable()->index();
             $table->timestamps();
         });
 
@@ -71,9 +71,9 @@ return new class extends Migration
             $table->foreignId('province_id')->constrained('provinces')->cascadeOnDelete();
             $table->string('name');
             $table->string('type')->nullable();
-            $table->string('code')->nullable()->index();
-            $table->string('postal_code', 10)->nullable();
-            $table->string('external_id')->nullable()->index();
+            // $table->string('code')->nullable()->index();
+            // $table->string('postal_code', 10)->nullable();
+            // $table->string('external_id')->nullable()->index();
             $table->timestamps();
         });
 
@@ -81,8 +81,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('city_id')->constrained('cities')->cascadeOnDelete();
             $table->string('name');
-            $table->string('postal_code', 10)->nullable();
-            $table->string('external_id')->nullable()->index();
+            // $table->string('postal_code', 10)->nullable();
+            // $table->string('external_id')->nullable()->index();
             $table->timestamps();
         });
 
@@ -91,7 +91,7 @@ return new class extends Migration
             $table->foreignId('district_id')->constrained('districts')->cascadeOnDelete();
             $table->string('name');
             $table->string('postal_code', 10)->nullable();
-            $table->string('external_id')->nullable()->index();
+            // $table->string('external_id')->nullable()->index();
             $table->timestamps();
         });
     }

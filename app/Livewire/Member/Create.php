@@ -94,7 +94,7 @@ class Create extends Component
 
     public function updatedSponsorUsername(): void
     {
-        $this->sponsorName = Models\User::query()
+        $this->sponsorName = User::query()
             ->where('username', $this->sponsorUsername)
             ->value('name') ?? '';
     }
@@ -216,11 +216,11 @@ class Create extends Component
         }
 
         if (str_starts_with($phone, '0')) {
-            return '+62' . substr($phone, 1);
+            return '+62'.substr($phone, 1);
         }
 
         if (! str_starts_with($phone, '+')) {
-            return '+' . $phone;
+            return '+'.$phone;
         }
 
         return $phone;
@@ -232,7 +232,7 @@ class Create extends Component
             return null;
         }
 
-        return Models\User::query()
+        return User::query()
             ->where('username', $this->sponsorUsername)
             ->first();
     }
@@ -254,7 +254,7 @@ class Create extends Component
     {
         do {
             $code = Str::upper(Str::random(10));
-        } while (Models\User::query()->where('referral_code', $code)->exists());
+        } while (User::query()->where('referral_code', $code)->exists());
 
         return $code;
     }
@@ -271,14 +271,14 @@ class Create extends Component
             return;
         }
 
-        if (Models\User::query()->where('phone', $phone)->exists()) {
+        if (User::query()->where('phone', $phone)->exists()) {
             $this->addError('phone', 'The phone has already been taken.');
 
             return;
         }
 
         DB::transaction(function () use ($validated, $phone, $sponsor): void {
-            $user = Models\User::create([
+            $user = User::create([
                 'name' => $validated['name'],
                 'username' => Str::lower($validated['username']),
                 'email' => Str::lower($validated['email']),

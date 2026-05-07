@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Member;
 
-use App\Models\User;
-use App\Models\Province;
+use App\Models\Bank;
 use App\Models\City;
 use App\Models\District;
-use App\Models\Village;
-use App\Models\Bank;
 use App\Models\Package;
+use App\Models\Province;
+use App\Models\User;
+use App\Models\Village;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
@@ -17,11 +17,45 @@ class Edit extends Component
     public User $user;
 
     // Properti Formulir
-    public $username, $name, $email, $phone;
-    public $birthDate, $gender, $idNumber, $npwp;
-    public $provinceId, $cityId, $districtId, $villageId, $address;
-    public $bankId, $accountNumber, $accountName;
-    public $packageId, $asStockist, $isStockistCentral, $isActive;
+    public $username;
+
+    public $name;
+
+    public $email;
+
+    public $phone;
+
+    public $birthDate;
+
+    public $gender;
+
+    public $idNumber;
+
+    public $npwp;
+
+    public $provinceId;
+
+    public $cityId;
+
+    public $districtId;
+
+    public $villageId;
+
+    public $address;
+
+    public $bankId;
+
+    public $accountNumber;
+
+    public $accountName;
+
+    public $packageId;
+
+    public $asStockist;
+
+    public $isStockistCentral;
+
+    public $isActive;
 
     public function mount(User $user): void
     {
