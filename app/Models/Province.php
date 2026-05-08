@@ -7,11 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['country_id', 'name', 'code'])]
+#[Fillable(['country_id', 'name'])]
 class Province extends Model
 {
-    public $timestamps = false;
-
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class, 'country_id');

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Country;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -11,26 +12,23 @@ class CountrySeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('Mengambil data negara dari API...');
-
         $data = [];
 
-        try {
-            // API restcountries.com sekarang memerlukan fields parameter (max 10 fields)
-            $response = Http::withoutVerifying()->timeout(60)->get('https://restcountries.com/v3.1/all', [
-                'fields' => 'cca2,cca3,ccn3,name,idd',
-            ]);
+        $path = base_path('countries.json');
 
-            if ($response->successful()) {
-                $countries = $response->json();
+        if (File::exists($path)) {
+            $this->command->info('Menggunakan file lokal: countries.json');
+            try {
+                $countries = json_decode(File::get($path), true);
+
                 if (empty($countries)) {
-                    $this->command->warn('API restcountries.com mengembalikan data kosong meskipun respon sukses. Mungkin ada masalah dengan parameter "fields" atau API.');
-                    $this->command->warn('Raw API Response (first 500 chars): '.Str::limit($response->body(), 500));
+                    $this->command->warn('File countries.json kosong.');
                 }
+
                 foreach ($countries as $item) {
                     $root = $item['idd']['root'] ?? '';
                     $suffix = is_array($item['idd']['suffixes'] ?? null) ? ($item['idd']['suffixes'][0] ?? '') : '';
-                    $phoneCode = (int) str_replace(['+', ' '], '', $root.$suffix);
+                    $phoneCode = (int) str_replace(['+', ' '], '', $root . $suffix);
 
                     $data[] = [
                         'iso' => Str::lower($item['cca2'] ?? ''),
@@ -42,11 +40,9 @@ class CountrySeeder extends Seeder
                         'status' => true,
                     ];
                 }
-            } else {
-                $this->command->error('API memberikan respon error: '.$response->status().' - '.$response->body());
+            } catch (\Exception $e) {
+                $this->command->warn('Gagal memproses file lokal: ' . $e->getMessage());
             }
-        } catch (\Exception $e) {
-            $this->command->warn('API Negara tidak dapat dijangkau: '.$e->getMessage());
         }
 
         // Fallback: Pastikan minimal ada data Indonesia jika API gagal
@@ -68,6 +64,6 @@ class CountrySeeder extends Seeder
             Country::upsert($chunk, ['iso'], ['name', 'nice_name', 'iso3', 'numcode', 'phone_code', 'status']);
         }
 
-        $this->command->info('Berhasil mengimpor '.count($data).' data negara.');
+        $this->command->info('Berhasil mengimpor ' . count($data) . ' data negara.');
     }
 }

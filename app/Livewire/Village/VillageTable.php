@@ -30,16 +30,15 @@ final class VillageTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['district_name', 'name', 'postal_code', 'external_id'];
+        $allowedSorts = ['district_name', 'name', 'postal_code', 'created_at'];
         $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'villages.id';
 
-        // Map alias fields to actual table columns for ROW_NUMBER
         $rowNumberSortField = match ($sortField) {
             'district_name' => 'districts.name',
             'name' => 'villages.name',
             'postal_code' => 'villages.postal_code',
-            'external_id' => 'villages.external_id',
-            default => 'villages.id'
+            'created_at' => 'villages.created_at',
+            default => 'villages.id',
         };
 
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
@@ -53,9 +52,7 @@ final class VillageTable extends PowerGridComponent
     public function relationSearch(): array
     {
         return [
-            'district' => [
-                'name',
-            ],
+            'district' => ['name'],
         ];
     }
 
@@ -65,8 +62,7 @@ final class VillageTable extends PowerGridComponent
             ->add('no')
             ->add('district_name')
             ->add('name')
-            ->add('postal_code')
-            ->add('external_id');
+            ->add('postal_code');
     }
 
     public function columns(): array
@@ -76,7 +72,6 @@ final class VillageTable extends PowerGridComponent
             Column::make('District', 'district_name')->sortable(),
             Column::make('Name', 'name')->sortable(),
             Column::make('Postal code', 'postal_code')->sortable(),
-            Column::make('External id', 'external_id')->sortable(),
             Column::action('Action'),
         ];
     }
@@ -87,23 +82,21 @@ final class VillageTable extends PowerGridComponent
             Filter::inputText('district_name')->operators(['contains']),
             Filter::inputText('name')->operators(['contains']),
             Filter::inputText('postal_code')->operators(['contains']),
-            Filter::inputText('external_id')->operators(['contains']),
         ];
     }
 
     #[On(VillageForm::EDIT_EVENT)]
-    public function edit($rowId): void
+    public function edit(int $rowId): void
     {
         $this->dispatch('open-dynamic-modal', config: VillageForm::make(
-            title: 'Edit Village #'.$rowId,
-            successMessage: 'Data village berhasil diperbarui.',
+            title: 'Edit Village',
             modelId: $rowId,
-        ))
-            ->to(DynamicModalForm::class);
+            successMessage: 'Data village berhasil diperbarui.',
+        ))->to(DynamicModalForm::class);
     }
 
     #[On(VillageForm::DELETE_EVENT)]
-    public function delete($rowId): void
+    public function delete(int $rowId): void
     {
         $village = Village::findOrFail($rowId);
         $village->delete();
@@ -126,7 +119,7 @@ final class VillageTable extends PowerGridComponent
                 ->dispatch(VillageForm::EDIT_EVENT, ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class('pg-btn-white dark:ring-pg-red-600 dark:border-pg-red-600 dark:hover:bg-pg-red-700 dark:ring-offset-pg-red-800 dark:text-pg-red-300 dark:bg-pg-red-700')
                 ->confirm('Are you sure you want to delete this village?')
                 ->dispatch(VillageForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];

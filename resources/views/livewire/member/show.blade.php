@@ -84,7 +84,7 @@
                 <div class="grid grid-cols-3 gap-4">
                     <dt class="font-medium">{{ __('Bank Account') }}</dt>
                     <dd class="col-span-2">{{ $user->bankAccounts->first()?->bank_id ?
-                        ($user->bankAccounts->first()?->account_name .' • '.
+                        ($user->bankAccounts->first()?->account_name .' - '.
                         $user->bankAccounts->first()?->account_number) : __('-') }}</dd>
                 </div>
                 <div class="grid grid-cols-3 gap-4">

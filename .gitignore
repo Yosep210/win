@@ -23,4 +23,5 @@ yarn-error.log
 /.zed
 .github/copilot-instructions.md
 pengenalan_dbs.sql
-countries21.json
+countries.json
+provinces.json

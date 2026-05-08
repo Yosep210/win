@@ -30,16 +30,14 @@ final class DistrictTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['city_name', 'name', 'postal_code', 'external_id'];
+        $allowedSorts = ['city_name', 'name', 'created_at'];
         $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'districts.id';
 
-        // Map alias fields to actual table columns for ROW_NUMBER
         $rowNumberSortField = match ($sortField) {
             'city_name' => 'cities.name',
             'name' => 'districts.name',
-            'postal_code' => 'districts.postal_code',
-            'external_id' => 'districts.external_id',
-            default => 'districts.id'
+            'created_at' => 'districts.created_at',
+            default => 'districts.id',
         };
 
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
@@ -53,9 +51,7 @@ final class DistrictTable extends PowerGridComponent
     public function relationSearch(): array
     {
         return [
-            'city' => [
-                'name',
-            ],
+            'city' => ['name'],
         ];
     }
 
@@ -64,9 +60,7 @@ final class DistrictTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('no')
             ->add('city_name')
-            ->add('name')
-            ->add('postal_code')
-            ->add('external_id');
+            ->add('name');
     }
 
     public function columns(): array
@@ -75,8 +69,6 @@ final class DistrictTable extends PowerGridComponent
             Column::make('#', 'no'),
             Column::make('City', 'city_name')->sortable(),
             Column::make('District', 'name')->sortable(),
-            Column::make('Postal code', 'postal_code')->sortable(),
-            Column::make('External id', 'external_id')->sortable(),
             Column::action('Action'),
         ];
     }
@@ -86,8 +78,6 @@ final class DistrictTable extends PowerGridComponent
         return [
             Filter::InputText('city_name')->operators(['contains']),
             Filter::InputText('name')->operators(['contains']),
-            Filter::InputText('postal_code')->operators(['contains']),
-            Filter::InputText('external_id')->operators(['contains']),
         ];
     }
 
@@ -99,7 +89,6 @@ final class DistrictTable extends PowerGridComponent
             modelId: $rowId,
             successMessage: 'Data District berhasil diperbarui.',
         ))->to(DynamicModalForm::class);
-        // Flux::toast(variant: 'warning', text: "Fitur edit District belum diimplementasikan. ID: {$rowId}");
     }
 
     #[On(DistrictForm::DELETE_EVENT)]
@@ -126,7 +115,7 @@ final class DistrictTable extends PowerGridComponent
                 ->dispatch(DistrictForm::EDIT_EVENT, ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class('pg-btn-white dark:ring-pg-red-600 dark:border-pg-red-600 dark:hover:bg-pg-red-700 dark:ring-offset-pg-red-800 dark:text-pg-red-300 dark:bg-pg-red-700')
                 ->confirm('Are you sure you want to delete this district?')
                 ->dispatch(DistrictForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];

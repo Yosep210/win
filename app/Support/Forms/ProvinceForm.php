@@ -39,13 +39,6 @@ class ProvinceForm
                     'validation' => ['required', 'string', 'max:255'],
                     'placeholder' => 'Masukkan nama province',
                 ],
-                [
-                    'name' => 'code',
-                    'label' => 'Province Code',
-                    'type' => 'text',
-                    'validation' => ['nullable', 'string', 'max:255'],
-                    'placeholder' => 'Masukkan kode province',
-                ],
             ],
         ];
     }

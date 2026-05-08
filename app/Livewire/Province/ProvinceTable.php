@@ -30,14 +30,13 @@ final class ProvinceTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['country_name', 'name', 'code'];
+        $allowedSorts = ['country_name', 'name'];
         $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'provinces.id';
 
         // Map alias fields to actual table columns for ROW_NUMBER
         $rowNumberSortField = match ($sortField) {
             'country_name' => 'countries.name',
             'name' => 'provinces.name',
-            'code' => 'provinces.code',
             default => 'provinces.id'
         };
 
@@ -63,8 +62,7 @@ final class ProvinceTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('no')
             ->add('country_name')
-            ->add('name')
-            ->add('code');
+            ->add('name');
     }
 
     public function columns(): array
@@ -73,7 +71,6 @@ final class ProvinceTable extends PowerGridComponent
             Column::make('#', 'no'),
             Column::make('Country', 'country_name')->sortable(),
             Column::make('Province', 'name')->sortable(),
-            Column::make('Code', 'code')->sortable(),
             Column::action('Action'),
         ];
     }
@@ -83,7 +80,6 @@ final class ProvinceTable extends PowerGridComponent
         return [
             Filter::InputText('country_name')->operators(['contains']),
             Filter::InputText('name')->operators(['contains']),
-            Filter::InputText('code')->operators(['contains']),
         ];
     }
 

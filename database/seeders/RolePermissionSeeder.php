@@ -18,10 +18,10 @@ class RolePermissionSeeder extends Seeder
         Role::firstOrCreate(['name' => 'staff']);
 
         $permissions = [
-            'user.create',
-            'user.view',
-            'user.edit',
-            'user.delete',
+            'create',
+            'view',
+            'edit',
+            'delete',
         ];
 
         foreach ($permissions as $permission) {

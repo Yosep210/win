@@ -7,11 +7,11 @@ use App\Models\Village;
 
 class VillageForm
 {
-    public const REFRESH_EVENT = 'refresh-village-table';
+    public const REFRESH_EVENT = 'pg:eventRefresh-villageTable';
 
-    public const EDIT_EVENT = 'edit-village';
+    public const EDIT_EVENT = 'village:edit';
 
-    public const DELETE_EVENT = 'delete-village';
+    public const DELETE_EVENT = 'village:delete';
 
     public static function make(
         string $title,
@@ -24,18 +24,13 @@ class VillageForm
             'modelId' => $modelId,
             'refreshEvent' => self::REFRESH_EVENT,
             'successMessage' => $successMessage,
-            'validationMessages' => [
-                'data.district_id.exists' => 'District ID tidak ditemukan.',
-                'data.postal_code.unique' => 'Kode pos sudah digunakan.',
-            ],
             'fields' => [
                 [
                     'name' => 'district_id',
-                    'label' => 'District ID',
+                    'label' => 'District',
                     'type' => 'select',
                     'options' => District::query()->select('id', 'name')->get()->toArray(),
-                    'validation' => ['required', 'integer'],
-                    'placeholder' => 'Masukkan district ID',
+                    'validation' => ['required', 'exists:districts,id'],
                 ],
                 [
                     'name' => 'name',
@@ -48,15 +43,8 @@ class VillageForm
                     'name' => 'postal_code',
                     'label' => 'Postal Code',
                     'type' => 'text',
-                    'validation' => ['nullable', 'string', 'max:20'],
+                    'validation' => ['nullable', 'string', 'max:10'],
                     'placeholder' => 'Masukkan kode pos',
-                ],
-                [
-                    'name' => 'external_id',
-                    'label' => 'External ID',
-                    'type' => 'text',
-                    'validation' => ['nullable', 'string', 'max:50'],
-                    'placeholder' => 'Masukkan external ID',
                 ],
             ],
         ];

@@ -30,18 +30,15 @@ final class CityTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['province_name', 'name', 'type', 'code', 'postal_code', 'external_id'];
+        $allowedSorts = ['province_name', 'name', 'type', 'created_at'];
         $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'cities.id';
 
-        // Map alias fields to actual table columns for ROW_NUMBER
         $rowNumberSortField = match ($sortField) {
             'province_name' => 'provinces.name',
             'name' => 'cities.name',
             'type' => 'cities.type',
-            'code' => 'cities.code',
-            'postal_code' => 'cities.postal_code',
-            'external_id' => 'cities.external_id',
-            default => 'cities.id'
+            'created_at' => 'cities.created_at',
+            default => 'cities.id',
         };
 
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
@@ -55,9 +52,7 @@ final class CityTable extends PowerGridComponent
     public function relationSearch(): array
     {
         return [
-            'province' => [
-                'name',
-            ],
+            'province' => ['name'],
         ];
     }
 
@@ -67,10 +62,7 @@ final class CityTable extends PowerGridComponent
             ->add('no')
             ->add('province_name')
             ->add('name')
-            ->add('type')
-            ->add('code')
-            ->add('postal_code')
-            ->add('external_id');
+            ->add('type');
     }
 
     public function columns(): array
@@ -80,9 +72,6 @@ final class CityTable extends PowerGridComponent
             Column::make('Province', 'province_name')->sortable(),
             Column::make('City', 'name')->sortable(),
             Column::make('Type', 'type')->sortable(),
-            Column::make('Code', 'code')->sortable(),
-            Column::make('Postal code', 'postal_code')->sortable(),
-            Column::make('External id', 'external_id')->sortable(),
             Column::action('Action'),
         ];
     }
@@ -93,9 +82,6 @@ final class CityTable extends PowerGridComponent
             Filter::InputText('province_name')->operators(['contains']),
             Filter::InputText('name')->operators(['contains']),
             Filter::InputText('type')->operators(['contains']),
-            Filter::InputText('code')->operators(['contains']),
-            Filter::InputText('postal_code')->operators(['contains']),
-            Filter::InputText('external_id')->operators(['contains']),
         ];
     }
 
@@ -107,7 +93,6 @@ final class CityTable extends PowerGridComponent
             modelId: $rowId,
             successMessage: 'Data City berhasil diperbarui.',
         ))->to(DynamicModalForm::class);
-        // Flux::toast(variant: 'warning', text: "Fitur edit City belum diimplementasikan. ID: {$rowId}");
     }
 
     #[On(CityForm::DELETE_EVENT)]
@@ -134,7 +119,7 @@ final class CityTable extends PowerGridComponent
                 ->dispatch(CityForm::EDIT_EVENT, ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
-                ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
+                ->class('pg-btn-white dark:ring-pg-red-600 dark:border-pg-red-600 dark:hover:bg-pg-red-700 dark:ring-offset-pg-red-800 dark:text-pg-red-300 dark:bg-pg-red-700')
                 ->confirm('Are you sure you want to delete this city?')
                 ->dispatch(CityForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];

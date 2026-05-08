@@ -24,9 +24,6 @@ class CityForm
             'modelId' => $modelId,
             'refreshEvent' => self::REFRESH_EVENT,
             'successMessage' => $successMessage,
-            'validationMessages' => [
-                'data.code.unique' => 'Kode sudah digunakan.',
-            ],
             'fields' => [
                 [
                     'name' => 'province_id',
@@ -39,8 +36,8 @@ class CityForm
                     'name' => 'name',
                     'label' => 'Nama City',
                     'type' => 'text',
-                    'validation' => ['nullable', 'string', 'max:255', 'unique:cities,code,'.($modelId ?? 'NULL').',id'],
-                    'placeholder' => 'Masukkan code kota',
+                    'validation' => ['required', 'string', 'max:255'],
+                    'placeholder' => 'Masukkan nama kota',
                 ],
                 [
                     'name' => 'type',
@@ -48,18 +45,6 @@ class CityForm
                     'type' => 'text',
                     'validation' => ['nullable', 'string', 'max:255'],
                     'placeholder' => 'Masukkan type kota',
-                ],
-                [
-                    'name' => 'code',
-                    'label' => 'Code',
-                    'type' => 'text',
-                    'validation' => ['nullable', 'string', 'max:50'],
-                ],
-                [
-                    'name' => 'postal_code',
-                    'label' => 'Postal Code',
-                    'type' => 'text',
-                    'validation' => ['nullable', 'string', 'max:10'],
                 ],
             ],
         ];
