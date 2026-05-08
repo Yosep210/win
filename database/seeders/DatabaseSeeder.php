@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(CountrySeeder::class);
         // $this->call(IndonesianWilayahSeeder::class);
+        // $this->call(IndonesianPostalCodeSeeder::class);
         $this->call(LegacyMasterDataSeeder::class);
         $this->call(ReferenceEwalletSeeder::class);
         $this->call(RolePermissionSeeder::class);
