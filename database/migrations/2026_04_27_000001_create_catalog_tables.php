@@ -70,7 +70,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('province_id')->constrained('provinces')->cascadeOnDelete();
             $table->string('name');
-            $table->string('type')->nullable();
+            $table->enum('type', ['city', 'regency'])->nullable();
             // $table->string('code')->nullable()->index();
             // $table->string('postal_code', 10)->nullable();
             // $table->string('external_id')->nullable()->index();
