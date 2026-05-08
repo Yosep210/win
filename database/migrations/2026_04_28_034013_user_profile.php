@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreignId('country_id')->nullable()->constrained('countries')->nullOnDelete();
             $table->foreignId('province_id')->nullable()->constrained('provinces')->nullOnDelete();
             $table->foreignId('city_id')->nullable()->constrained('cities')->nullOnDelete();
-            $table->foreignId('district_id')->nullable()->constrained('districts')->nullOnDelete();
+            $table->foreignId('regency_id')->nullable()->constrained('regencies')->nullOnDelete();
             $table->foreignId('village_id')->nullable()->constrained('villages')->nullOnDelete();
             $table->string('photo')->nullable();
             $table->string('id_card_photo')->nullable();

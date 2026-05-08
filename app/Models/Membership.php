@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'stockist_name',
     'stockist_province_id',
     'stockist_city_id',
-    'stockist_district_id',
+    'stockist_regency_id',
     'stockist_village',
     'stockist_address',
     'wd_status',

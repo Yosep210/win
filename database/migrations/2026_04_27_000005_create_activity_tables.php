@@ -83,11 +83,11 @@ return new class extends Migration
             $table->string('recipient_email')->nullable();
             $table->foreignId('province_id')->nullable()->constrained('provinces')->nullOnDelete();
             $table->foreignId('city_id')->nullable()->constrained('cities')->nullOnDelete();
-            $table->foreignId('district_id')->nullable()->constrained('districts')->nullOnDelete();
+            $table->foreignId('regency_id')->nullable()->constrained('regencies')->nullOnDelete();
             $table->foreignId('village_id')->nullable()->constrained('villages')->nullOnDelete();
             $table->string('province_name')->nullable();
             $table->string('city_name')->nullable();
-            $table->string('district_name')->nullable();
+            $table->string('regency_name')->nullable();
             $table->string('village_name')->nullable();
             $table->text('address')->nullable();
             $table->string('postcode', 10)->nullable();

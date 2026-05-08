@@ -8,8 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['city_id', 'name'])]
-class District extends Model
+class Regency extends Model
 {
+    public $timestamps = false;
+
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
@@ -20,7 +22,7 @@ class District extends Model
         return $this->hasMany(Village::class);
     }
 
-    public static function districtCount(): int
+    public static function regencyCount(): int
     {
         return self::count();
     }

@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['district_id', 'name', 'postal_code'])]
+#[Fillable(['regency_id', 'name', 'postal_code'])]
 class Village extends Model
 {
-    public function district(): BelongsTo
+    public $timestamps = false;
+
+    public function regency(): BelongsTo
     {
-        return $this->belongsTo(District::class);
+        return $this->belongsTo(Regency::class);
     }
 }

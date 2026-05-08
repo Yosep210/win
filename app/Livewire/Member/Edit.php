@@ -3,14 +3,8 @@
 namespace App\Livewire\Member;
 
 use App\Concerns\ProfileValidationRules;
-use App\Models;
-use App\Models\Bank;
-use App\Models\City;
-use App\Models\District;
-use App\Models\Package;
-use App\Models\Province;
+use App\Livewire\Member\Concerns\InteractsWithMemberFormData;
 use App\Models\User;
-use App\Models\Village;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
@@ -20,81 +14,80 @@ use Livewire\Component;
 
 class Edit extends Component
 {
+    use InteractsWithMemberFormData;
     use ProfileValidationRules;
 
     public User $user;
 
-    // Properti Formulir
-    public $username;
+    public string $username = '';
 
-    public $name;
+    public string $name = '';
 
-    public $email;
+    public string $email = '';
 
-    public $phone;
+    public string $phone = '';
 
-    public $birthDate;
+    public string $birthDate = '';
 
-    public $gender;
+    public string $gender = '';
 
-    public $idNumber;
+    public string $idNumber = '';
 
-    public $npwp;
+    public string $npwp = '';
 
-    public $countryId;
+    public ?int $countryId = null;
 
-    public $provinceId;
+    public ?int $provinceId = null;
 
-    public $cityId;
+    public ?int $cityId = null;
 
-    public $districtId;
+    public ?int $regencyId = null;
 
-    public $villageId;
+    public ?int $villageId = null;
 
-    public $address;
+    public string $address = '';
 
-    public $bankId;
+    public ?int $bankId = null;
 
-    public $accountNumber;
+    public string $accountNumber = '';
 
-    public $accountName;
+    public string $accountName = '';
 
-    public $packageId;
+    public ?int $packageId = null;
 
-    public $asStockist;
+    public string $asStockist = 'member';
 
-    public $isStockistCentral;
+    public bool $isStockistCentral = false;
 
-    public $isActive;
+    public bool $isActive = true;
 
     public function mount(User $user): void
     {
         $this->user = $user->load(['profile', 'membership.package', 'bankAccounts', 'network']);
 
-        // Inisialisasi properti dari model
-        $this->username = $user->username;
-        $this->name = $user->name;
-        $this->email = $user->email;
-        $this->phone = $user->phone;
+        $this->username = (string) ($user->username ?? '');
+        $this->name = (string) ($user->name ?? '');
+        $this->email = (string) ($user->email ?? '');
+        $this->phone = (string) ($user->phone ?? '');
         $this->isActive = $user->status === 'active';
 
         if ($profile = $user->profile) {
             $this->birthDate = optional($profile->birth_date)->format('Y-m-d');
-            $this->gender = $profile->gender;
-            $this->idNumber = $profile->id_number;
-            $this->npwp = $profile->npwp;
+            $this->gender = (string) ($profile->gender ?? '');
+            $this->idNumber = (string) ($profile->id_number ?? '');
+            $this->npwp = (string) ($profile->npwp ?? '');
             $this->provinceId = $profile->province_id;
             $this->cityId = $profile->city_id;
-            $this->districtId = $profile->district_id;
+            $this->regencyId = $profile->regency_id;
             $this->villageId = $profile->village_id;
-            $this->address = $profile->address;
+            $this->address = (string) ($profile->address ?? '');
             $this->countryId = $profile->country_id;
         }
 
-        if ($bankAccount = $user->bankAccounts->first()) {
+        if ($bankAccount = $user->bankAccounts->sortByDesc('is_primary')->first()) {
             $this->bankId = $bankAccount->bank_id;
-            $this->accountNumber = $bankAccount->account_number;
-            $this->accountName = $bankAccount->account_name;
+            $this->accountNumber = (string) ($bankAccount->account_number ?? '');
+            $this->accountName = (string) ($bankAccount->account_name ?? '');
         }
 
         if ($membership = $user->membership) {
@@ -103,39 +96,32 @@ class Edit extends Component
             $this->isStockistCentral = (bool) $membership->is_stockist_central;
         }
 
-        $this->countryId ??= Models\Country::query()
-            ->where('iso', 'id')
-            ->value('id') ?? Models\Country::query()->value('id');
-        $this->asStockist ??= 'member';
-        $this->isStockistCentral ??= false;
+        $this->countryId ??= $this->defaultCountryId();
     }
 
     public function updatedProvinceId(): void
     {
         $this->cityId = null;
-        $this->districtId = null;
+        $this->regencyId = null;
         $this->villageId = null;
     }
 
     public function updatedCityId(): void
     {
-        $this->districtId = null;
+        $this->regencyId = null;
         $this->villageId = null;
     }
 
-    public function updatedDistrictId(): void
+    public function updatedRegencyId(): void
     {
         $this->villageId = null;
     }
 
     protected function formRules(): array
     {
-        $hasProvinceOptions = Province::query()->exists();
-        $hasBankOptions = Bank::query()->where('status', true)->exists();
-        $hasPackageOptions = Package::query()
-            ->where('is_active', true)
-            ->where('is_register', true)
-            ->exists();
+        $hasProvinceOptions = $this->hasProvinceOptions();
+        $hasBankOptions = $this->hasBankOptions();
+        $hasPackageOptions = $this->hasPackageOptions();
 
         return [
             ...$this->profileRules($this->user->id),
@@ -144,15 +130,16 @@ class Edit extends Component
             'gender' => ['required', Rule::in(['male', 'female'])],
             'idNumber' => ['required', 'string', 'max:255', Rule::unique('user_profiles', 'id_number')->ignore($this->user->profile?->id)],
             'npwp' => ['nullable', 'string', 'max:255', Rule::unique('user_profiles', 'npwp')->ignore($this->user->profile?->id)],
-            'provinceId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', 'exists:provinces,id'],
-            'cityId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', 'exists:cities,id'],
-            'districtId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', 'exists:districts,id'],
-            'villageId' => ['nullable', 'exists:villages,id'],
+            'countryId' => ['nullable', $this->countryExistsRule()],
+            'provinceId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', $this->provinceExistsRule()],
+            'cityId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', $this->cityExistsRule()],
+            'regencyId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', $this->regencyExistsRule()],
+            'villageId' => ['nullable', $this->villageExistsRule()],
             'address' => [Rule::requiredIf($hasProvinceOptions), 'nullable', 'string'],
-            'bankId' => [Rule::requiredIf($hasBankOptions), 'nullable', 'exists:banks,id'],
+            'bankId' => [Rule::requiredIf($hasBankOptions), 'nullable', $this->bankExistsRule()],
             'accountNumber' => [Rule::requiredIf($hasBankOptions), 'nullable', 'string', 'max:255'],
             'accountName' => [Rule::requiredIf($hasBankOptions), 'nullable', 'string', 'max:255'],
-            'packageId' => [Rule::requiredIf($hasPackageOptions), 'nullable', 'exists:packages,id'],
+            'packageId' => [Rule::requiredIf($hasPackageOptions), 'nullable', $this->packageExistsRule()],
             'asStockist' => ['required', Rule::in(['member', 'stockist'])],
             'isStockistCentral' => ['boolean'],
             'isActive' => ['boolean'],
@@ -163,10 +150,11 @@ class Edit extends Component
     {
         return [
             'birthDate' => 'birth date',
+            'countryId' => 'country',
             'idNumber' => 'ID card number',
             'provinceId' => 'province',
             'cityId' => 'city',
-            'districtId' => 'district',
+            'regencyId' => 'regency',
             'villageId' => 'village',
             'bankId' => 'bank',
             'accountNumber' => 'account number',
@@ -194,29 +182,36 @@ class Edit extends Component
         return $phone;
     }
 
+    protected function sanitizeString(?string $value): string
+    {
+        return trim((string) $value);
+    }
+
+    protected function normalizeFormState(): void
+    {
+        $this->name = $this->sanitizeString($this->name);
+        $this->username = Str::lower($this->sanitizeString($this->username));
+        $this->email = Str::lower($this->sanitizeString($this->email));
+        $this->phone = $this->normalizePhone($this->phone);
+        $this->idNumber = $this->sanitizeString($this->idNumber);
+        $this->npwp = $this->sanitizeString($this->npwp);
+        $this->address = $this->sanitizeString($this->address);
+        $this->accountNumber = $this->sanitizeString($this->accountNumber);
+        $this->accountName = $this->sanitizeString($this->accountName);
+    }
+
     public function save(): void
     {
+        $this->normalizeFormState();
+
         $validated = $this->validate($this->formRules(), [], $this->validationAttributes());
-        $phone = $this->normalizePhone($validated['phone']);
 
-        if ($phone === '') {
-            $this->addError('phone', 'Phone number is required.');
-
-            return;
-        }
-
-        if (User::query()->where('phone', $phone)->whereKeyNot($this->user->id)->exists()) {
-            $this->addError('phone', 'The phone has already been taken.');
-
-            return;
-        }
-
-        DB::transaction(function () use ($validated, $phone): void {
+        DB::transaction(function () use ($validated): void {
             $this->user->update([
                 'name' => $validated['name'],
-                'username' => Str::lower($validated['username']),
-                'email' => Str::lower($validated['email']),
-                'phone' => $phone,
+                'username' => $validated['username'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
                 'status' => $this->isActive ? 'active' : 'inactive',
             ]);
 
@@ -231,7 +226,7 @@ class Edit extends Component
                     'country_id' => $this->countryId,
                     'province_id' => $validated['provinceId'] ?: null,
                     'city_id' => $validated['cityId'] ?: null,
-                    'district_id' => $validated['districtId'] ?: null,
+                    'regency_id' => $validated['regencyId'] ?: null,
                     'village_id' => $validated['villageId'] ?: null,
                 ]
             );
@@ -251,7 +246,10 @@ class Edit extends Component
             );
 
             if ($validated['bankId'] && $validated['accountNumber'] && $validated['accountName']) {
-                $existingBankAccount = $this->user->bankAccounts()->first();
+                $existingBankAccount = $this->user->bankAccounts()
+                    ->orderByDesc('is_primary')
+                    ->orderBy('id')
+                    ->first();
 
                 if ($existingBankAccount) {
                     $existingBankAccount->update([
@@ -269,7 +267,9 @@ class Edit extends Component
                     ]);
                 }
             } else {
-                $this->user->bankAccounts()->delete();
+                $this->user->bankAccounts()
+                    ->where('is_primary', true)
+                    ->delete();
             }
         });
 
@@ -281,12 +281,12 @@ class Edit extends Component
     public function render(): View
     {
         return view('livewire.member.edit', [
-            'provinces' => Province::all(),
-            'cities' => $this->provinceId ? City::where('province_id', $this->provinceId)->get() : collect(),
-            'districts' => $this->cityId ? District::where('city_id', $this->cityId)->get() : collect(),
-            'villages' => $this->districtId ? Village::where('district_id', $this->districtId)->get() : collect(),
-            'banks' => Bank::all(),
-            'packages' => Package::all(),
+            'provinces' => $this->provinces(),
+            'cities' => $this->cities(),
+            'regencies' => $this->regencies(),
+            'villages' => $this->villages(),
+            'banks' => $this->banks(),
+            'packages' => $this->packages(),
         ]);
     }
 }

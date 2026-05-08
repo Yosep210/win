@@ -3,24 +3,24 @@
 namespace App\Support\Forms;
 
 use App\Models\City;
-use App\Models\District;
+use App\Models\Regency;
 
-class DistrictForm
+class RegencyForm
 {
-    public const REFRESH_EVENT = 'pg:eventRefresh-districtTable';
+    public const REFRESH_EVENT = 'pg:eventRefresh-regencyTable';
 
-    public const EDIT_EVENT = 'district:edit';
+    public const EDIT_EVENT = 'regency:edit';
 
-    public const DELETE_EVENT = 'district:delete';
+    public const DELETE_EVENT = 'regency:delete';
 
     public static function make(
         string $title,
         ?int $modelId = null,
-        string $successMessage = 'Data district berhasil disimpan.',
+        string $successMessage = 'Data regency berhasil disimpan.',
     ): array {
         return [
             'title' => $title,
-            'modelClass' => District::class,
+            'modelClass' => Regency::class,
             'modelId' => $modelId,
             'refreshEvent' => self::REFRESH_EVENT,
             'successMessage' => $successMessage,
@@ -34,10 +34,10 @@ class DistrictForm
                 ],
                 [
                     'name' => 'name',
-                    'label' => 'Nama District',
+                    'label' => 'Nama Regency',
                     'type' => 'text',
                     'validation' => ['required', 'string', 'max:255'],
-                    'placeholder' => 'Masukkan nama district',
+                    'placeholder' => 'Masukkan nama regency',
                 ],
             ],
         ];

@@ -2,7 +2,7 @@
 
 namespace App\Support\Forms;
 
-use App\Models\District;
+use App\Models\Regency;
 use App\Models\Village;
 
 class VillageForm
@@ -26,11 +26,11 @@ class VillageForm
             'successMessage' => $successMessage,
             'fields' => [
                 [
-                    'name' => 'district_id',
-                    'label' => 'District',
+                    'name' => 'regency_id',
+                    'label' => 'Regency',
                     'type' => 'select',
-                    'options' => District::query()->select('id', 'name')->get()->toArray(),
-                    'validation' => ['required', 'exists:districts,id'],
+                    'options' => Regency::query()->select('id', 'name')->get()->toArray(),
+                    'validation' => ['required', 'exists:regencies,id'],
                 ],
                 [
                     'name' => 'name',

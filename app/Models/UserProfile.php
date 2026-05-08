@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'country_id',
     'province_id',
     'city_id',
-    'district_id',
+    'regency_id',
     'village_id',
     'photo',
     'id_card_photo',

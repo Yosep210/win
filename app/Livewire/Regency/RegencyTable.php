@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire\District;
+namespace App\Livewire\Regency;
 
 use App\Livewire\DynamicModalForm;
-use App\Models\District;
-use App\Support\Forms\DistrictForm;
+use App\Models\Regency;
+use App\Support\Forms\RegencyForm;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
@@ -15,9 +15,9 @@ use PowerComponents\LivewirePowerGrid\Facades\PowerGrid;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 use PowerComponents\LivewirePowerGrid\PowerGridFields;
 
-final class DistrictTable extends PowerGridComponent
+final class RegencyTable extends PowerGridComponent
 {
-    public string $tableName = 'districtTable';
+    public string $tableName = 'regencyTable';
 
     public function setUp(): array
     {
@@ -31,20 +31,20 @@ final class DistrictTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSorts = ['city_name', 'name', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'districts.id';
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'regencies.id';
 
         $rowNumberSortField = match ($sortField) {
             'city_name' => 'cities.name',
-            'name' => 'districts.name',
-            'created_at' => 'districts.created_at',
-            default => 'districts.id',
+            'name' => 'regencies.name',
+            'created_at' => 'regencies.created_at',
+            default => 'regencies.id',
         };
 
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
-        return District::query()
-            ->leftJoin('cities', 'districts.city_id', '=', 'cities.id')
-            ->select('districts.*', 'cities.name as city_name')
+        return Regency::query()
+            ->leftJoin('cities', 'regencies.city_id', '=', 'cities.id')
+            ->select('regencies.*', 'cities.name as city_name')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
     }
 
@@ -68,7 +68,7 @@ final class DistrictTable extends PowerGridComponent
         return [
             Column::make('#', 'no'),
             Column::make('City', 'city_name')->sortable(),
-            Column::make('District', 'name')->sortable(),
+            Column::make('Regency', 'name')->sortable(),
             Column::action('Action'),
         ];
     }
@@ -81,43 +81,43 @@ final class DistrictTable extends PowerGridComponent
         ];
     }
 
-    #[On(DistrictForm::EDIT_EVENT)]
+    #[On(RegencyForm::EDIT_EVENT)]
     public function edit(int $rowId): void
     {
-        $this->dispatch('open-dynamic-modal', config: DistrictForm::make(
-            title: 'Edit District',
+        $this->dispatch('open-dynamic-modal', config: RegencyForm::make(
+            title: 'Edit Regency',
             modelId: $rowId,
-            successMessage: 'Data District berhasil diperbarui.',
+            successMessage: 'Data Regency berhasil diperbarui.',
         ))->to(DynamicModalForm::class);
     }
 
-    #[On(DistrictForm::DELETE_EVENT)]
+    #[On(RegencyForm::DELETE_EVENT)]
     public function delete(int $rowId): void
     {
-        $district = District::findOrFail($rowId);
-        $district->delete();
+        $regency = Regency::findOrFail($rowId);
+        $regency->delete();
 
         Flux::toast(
             variant: 'success',
-            text: 'Data District berhasil dihapus.',
+            text: 'Data Regency berhasil dihapus.',
         );
 
         $this->dispatch('$commit')->self();
     }
 
-    public function actions(District $row): array
+    public function actions(Regency $row): array
     {
         return [
             Button::add('edit')
                 ->slot('Edit')
                 ->id()
                 ->class('pg-btn-white dark:ring-pg-primary-600 dark:border-pg-primary-600 dark:hover:bg-pg-primary-700 dark:ring-offset-pg-primary-800 dark:text-pg-primary-300 dark:bg-pg-primary-700')
-                ->dispatch(DistrictForm::EDIT_EVENT, ['rowId' => $row->id]),
+                ->dispatch(RegencyForm::EDIT_EVENT, ['rowId' => $row->id]),
             Button::add('delete')
                 ->slot('Delete')
                 ->class('pg-btn-white dark:ring-pg-red-600 dark:border-pg-red-600 dark:hover:bg-pg-red-700 dark:ring-offset-pg-red-800 dark:text-pg-red-300 dark:bg-pg-red-700')
-                ->confirm('Are you sure you want to delete this district?')
-                ->dispatch(DistrictForm::DELETE_EVENT, ['rowId' => $row->id]),
+                ->confirm('Are you sure you want to delete this regency?')
+                ->dispatch(RegencyForm::DELETE_EVENT, ['rowId' => $row->id]),
         ];
     }
 }

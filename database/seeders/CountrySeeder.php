@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Country;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class CountrySeeder extends Seeder
@@ -17,37 +16,46 @@ class CountrySeeder extends Seeder
         $path = base_path('countries.json');
 
         if (File::exists($path)) {
-            $this->command->info('Menggunakan file lokal: countries.json');
+            $this->command?->info('Menggunakan file lokal: countries.json');
             try {
                 $countries = json_decode(File::get($path), true);
 
                 if (empty($countries)) {
-                    $this->command->warn('File countries.json kosong.');
+                    $this->command?->warn('File countries.json kosong.');
                 }
 
                 foreach ($countries as $item) {
-                    $root = $item['idd']['root'] ?? '';
-                    $suffix = is_array($item['idd']['suffixes'] ?? null) ? ($item['idd']['suffixes'][0] ?? '') : '';
-                    $phoneCode = (int) str_replace(['+', ' '], '', $root . $suffix);
+                    $iso = Str::lower((string) data_get($item, 'cca2', ''));
+                    $officialName = trim((string) data_get($item, 'name.official', ''));
+                    $commonName = trim((string) data_get($item, 'name.common', ''));
+
+                    if ($iso === '' || $officialName === '' || $commonName === '') {
+                        continue;
+                    }
+
+                    $root = (string) data_get($item, 'idd.root', '');
+                    $suffixes = data_get($item, 'idd.suffixes', []);
+                    $suffix = is_array($suffixes) ? (string) ($suffixes[0] ?? '') : '';
+                    $normalizedPhoneCode = str_replace(['+', ' '], '', $root.$suffix);
+                    $numcode = data_get($item, 'ccn3');
 
                     $data[] = [
-                        'iso' => Str::lower($item['cca2'] ?? ''),
-                        'name' => $item['name']['official'] ?? '',
-                        'nice_name' => $item['name']['common'] ?? '',
-                        'iso3' => $item['cca3'] ?? null,
-                        'numcode' => ($item['ccn3'] !== '') ? (int) $item['ccn3'] : null,
-                        'phone_code' => $phoneCode,
+                        'iso' => $iso,
+                        'name' => $officialName,
+                        'nice_name' => $commonName,
+                        'iso3' => data_get($item, 'cca3'),
+                        'numcode' => $numcode !== null && $numcode !== '' ? (int) $numcode : null,
+                        'phone_code' => $normalizedPhoneCode !== '' ? (int) $normalizedPhoneCode : 0,
                         'status' => true,
                     ];
                 }
-            } catch (\Exception $e) {
-                $this->command->warn('Gagal memproses file lokal: ' . $e->getMessage());
+            } catch (\Throwable $exception) {
+                $this->command?->warn('Gagal memproses file lokal: '.$exception->getMessage());
             }
         }
 
-        // Fallback: Pastikan minimal ada data Indonesia jika API gagal
         if (empty($data)) {
-            $this->command->warn('Menggunakan data fallback untuk Indonesia agar seeder lain tetap berjalan.');
+            $this->command?->warn('Menggunakan data fallback untuk Indonesia agar seeder lain tetap berjalan.');
             $data[] = [
                 'iso' => 'id',
                 'name' => 'Republic of Indonesia',
@@ -59,11 +67,10 @@ class CountrySeeder extends Seeder
             ];
         }
 
-        // Menggunakan upsert agar jika dijalankan ulang tidak terjadi duplikat berdasarkan kolom 'iso'.
         foreach (array_chunk($data, 50) as $chunk) {
-            Country::upsert($chunk, ['iso'], ['name', 'nice_name', 'iso3', 'numcode', 'phone_code', 'status']);
+            Country::query()->upsert($chunk, ['iso'], ['name', 'nice_name', 'iso3', 'numcode', 'phone_code', 'status']);
         }
 
-        $this->command->info('Berhasil mengimpor ' . count($data) . ' data negara.');
+        $this->command?->info('Berhasil mengimpor '.count($data).' data negara.');
     }
 }

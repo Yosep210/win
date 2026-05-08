@@ -11,7 +11,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::livewire('bank', Livewire\Bank\Index::class)->name('bank.index');
     Route::livewire('city', Livewire\City\Index::class)->name('city.index');
     Route::livewire('country', Livewire\Country\Index::class)->name('country.index');
-    Route::livewire('district', Livewire\District\Index::class)->name('district.index');
+    Route::livewire('regency', Livewire\Regency\Index::class)->name('regency.index');
     Route::livewire('members/create', Livewire\Member\Create::class)->name('member.create');
     Route::livewire('members', Livewire\Member\Index::class)->name('member.index');
     Route::get('members/{user}', Livewire\Member\Show::class)->name('member.show');

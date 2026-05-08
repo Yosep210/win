@@ -30,11 +30,11 @@ final class VillageTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['district_name', 'name', 'postal_code', 'created_at'];
+        $allowedSorts = ['regency_name', 'name', 'postal_code', 'created_at'];
         $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'villages.id';
 
         $rowNumberSortField = match ($sortField) {
-            'district_name' => 'districts.name',
+            'regency_name' => 'regencies.name',
             'name' => 'villages.name',
             'postal_code' => 'villages.postal_code',
             'created_at' => 'villages.created_at',
@@ -44,15 +44,15 @@ final class VillageTable extends PowerGridComponent
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Village::query()
-            ->leftJoin('districts', 'villages.district_id', '=', 'districts.id')
-            ->select('villages.*', 'districts.name as district_name')
+            ->leftJoin('regencies', 'villages.regency_id', '=', 'regencies.id')
+            ->select('villages.*', 'regencies.name as regency_name')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
     {
         return [
-            'district' => ['name'],
+            'regency' => ['name'],
         ];
     }
 
@@ -60,7 +60,7 @@ final class VillageTable extends PowerGridComponent
     {
         return PowerGrid::fields()
             ->add('no')
-            ->add('district_name')
+            ->add('regency_name')
             ->add('name')
             ->add('postal_code');
     }
@@ -69,7 +69,7 @@ final class VillageTable extends PowerGridComponent
     {
         return [
             Column::make('#', 'no'),
-            Column::make('District', 'district_name')->sortable(),
+            Column::make('Regency', 'regency_name')->sortable(),
             Column::make('Name', 'name')->sortable(),
             Column::make('Postal code', 'postal_code')->sortable(),
             Column::action('Action'),
@@ -79,7 +79,7 @@ final class VillageTable extends PowerGridComponent
     public function filters(): array
     {
         return [
-            Filter::inputText('district_name')->operators(['contains']),
+            Filter::inputText('regency_name')->operators(['contains']),
             Filter::inputText('name')->operators(['contains']),
             Filter::inputText('postal_code')->operators(['contains']),
         ];

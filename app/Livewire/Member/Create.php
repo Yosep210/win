@@ -4,11 +4,11 @@ namespace App\Livewire\Member;
 
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
+use App\Livewire\Member\Concerns\InteractsWithMemberFormData;
 use App\Models;
 use App\Models\User;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -16,6 +16,7 @@ use Livewire\Component;
 
 class Create extends Component
 {
+    use InteractsWithMemberFormData;
     use PasswordValidationRules;
     use ProfileValidationRules;
 
@@ -45,7 +46,7 @@ class Create extends Component
 
     public ?int $cityId = null;
 
-    public ?int $districtId = null;
+    public ?int $regencyId = null;
 
     public ?int $villageId = null;
 
@@ -69,104 +70,56 @@ class Create extends Component
 
     public function mount(): void
     {
-        $this->countryId = Models\Country::query()
-            ->where('iso', 'id')
-            ->value('id') ?? Models\Country::query()->value('id');
+        $this->countryId = $this->defaultCountryId();
     }
 
     public function updatedProvinceId(): void
     {
         $this->cityId = null;
-        $this->districtId = null;
+        $this->regencyId = null;
         $this->villageId = null;
     }
 
     public function updatedCityId(): void
     {
-        $this->districtId = null;
+        $this->regencyId = null;
         $this->villageId = null;
     }
 
-    public function updatedDistrictId(): void
+    public function updatedRegencyId(): void
     {
         $this->villageId = null;
     }
 
     public function updatedSponsorUsername(): void
     {
-        $this->sponsorName = User::query()
-            ->where('username', $this->sponsorUsername)
-            ->value('name') ?? '';
+        $this->sponsorUsername = Str::lower(trim($this->sponsorUsername));
+        $this->sponsorName = $this->lookupSponsorName($this->sponsorUsername);
     }
 
-    protected function provinces(): Collection
+    protected function validationAttributes(): array
     {
-        return Models\Province::query()
-            ->orderBy('name')
-            ->get();
-    }
-
-    protected function cities(): Collection
-    {
-        if (! $this->provinceId) {
-            return new Collection;
-        }
-
-        return Models\City::query()
-            ->where('province_id', $this->provinceId)
-            ->orderBy('name')
-            ->get();
-    }
-
-    protected function districts(): Collection
-    {
-        if (! $this->cityId) {
-            return new Collection;
-        }
-
-        return Models\District::query()
-            ->where('city_id', $this->cityId)
-            ->orderBy('name')
-            ->get();
-    }
-
-    protected function villages(): Collection
-    {
-        if (! $this->districtId) {
-            return new Collection;
-        }
-
-        return Models\Village::query()
-            ->where('district_id', $this->districtId)
-            ->orderBy('name')
-            ->get();
-    }
-
-    protected function banks(): Collection
-    {
-        return Models\Bank::query()
-            ->where('status', true)
-            ->orderBy('name')
-            ->get();
-    }
-
-    protected function packages(): Collection
-    {
-        return Models\Package::query()
-            ->where('is_active', true)
-            ->where('is_register', true)
-            ->orderBy('name')
-            ->get();
+        return [
+            'birthDate' => 'birth date',
+            'countryId' => 'country',
+            'idNumber' => 'ID card number',
+            'provinceId' => 'province',
+            'cityId' => 'city',
+            'regencyId' => 'regency',
+            'villageId' => 'village',
+            'bankId' => 'bank',
+            'accountNumber' => 'account number',
+            'accountName' => 'account name',
+            'packageId' => 'package',
+            'sponsorUsername' => 'sponsor username',
+        ];
     }
 
     protected function formRules(): array
     {
-        $hasProvinceOptions = Models\Province::query()->exists();
-        $hasBankOptions = Models\Bank::query()->where('status', true)->exists();
-        $hasPackageOptions = Models\Package::query()
-            ->where('is_active', true)
-            ->where('is_register', true)
-            ->exists();
+        $hasProvinceOptions = $this->hasProvinceOptions();
+        $hasBankOptions = $this->hasBankOptions();
+        $hasPackageOptions = $this->hasPackageOptions();
 
         return [
             ...$this->profileRules(),
@@ -176,34 +129,18 @@ class Create extends Component
             'gender' => ['required', Rule::in(['male', 'female'])],
             'idNumber' => ['required', 'string', 'max:255', Rule::unique('user_profiles', 'id_number')],
             'npwp' => ['nullable', 'string', 'max:255', Rule::unique('user_profiles', 'npwp')],
-            'provinceId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', 'exists:provinces,id'],
-            'cityId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', 'exists:cities,id'],
-            'districtId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', 'exists:districts,id'],
-            'villageId' => ['nullable', 'exists:villages,id'],
+            'countryId' => ['nullable', $this->countryExistsRule()],
+            'provinceId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', $this->provinceExistsRule()],
+            'cityId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', $this->cityExistsRule()],
+            'regencyId' => [Rule::requiredIf($hasProvinceOptions), 'nullable', $this->regencyExistsRule()],
+            'villageId' => ['nullable', $this->villageExistsRule()],
             'address' => [Rule::requiredIf($hasProvinceOptions), 'nullable', 'string'],
-            'bankId' => [Rule::requiredIf($hasBankOptions), 'nullable', 'exists:banks,id'],
+            'bankId' => [Rule::requiredIf($hasBankOptions), 'nullable', $this->bankExistsRule()],
             'accountNumber' => [Rule::requiredIf($hasBankOptions), 'nullable', 'string', 'max:255'],
             'accountName' => [Rule::requiredIf($hasBankOptions), 'nullable', 'string', 'max:255'],
-            'packageId' => [Rule::requiredIf($hasPackageOptions), 'nullable', 'exists:packages,id'],
+            'packageId' => [Rule::requiredIf($hasPackageOptions), 'nullable', $this->packageExistsRule()],
             'asStockist' => ['required', Rule::in(['member', 'stockist'])],
             'sponsorUsername' => ['nullable', 'string', 'exists:users,username', 'different:username'],
-        ];
-    }
-
-    protected function validationAttributes(): array
-    {
-        return [
-            'birthDate' => 'birth date',
-            'idNumber' => 'ID card number',
-            'provinceId' => 'province',
-            'cityId' => 'city',
-            'districtId' => 'district',
-            'villageId' => 'village',
-            'bankId' => 'bank',
-            'accountNumber' => 'account number',
-            'accountName' => 'account name',
-            'packageId' => 'package',
-            'sponsorUsername' => 'sponsor username',
         ];
     }
 
@@ -224,6 +161,37 @@ class Create extends Component
         }
 
         return $phone;
+    }
+
+    protected function sanitizeString(?string $value): string
+    {
+        return trim((string) $value);
+    }
+
+    protected function normalizeFormState(): void
+    {
+        $this->name = $this->sanitizeString($this->name);
+        $this->username = Str::lower($this->sanitizeString($this->username));
+        $this->email = Str::lower($this->sanitizeString($this->email));
+        $this->phone = $this->normalizePhone($this->phone);
+        $this->idNumber = $this->sanitizeString($this->idNumber);
+        $this->npwp = $this->sanitizeString($this->npwp);
+        $this->address = $this->sanitizeString($this->address);
+        $this->accountNumber = $this->sanitizeString($this->accountNumber);
+        $this->accountName = $this->sanitizeString($this->accountName);
+        $this->sponsorUsername = Str::lower($this->sanitizeString($this->sponsorUsername));
+        $this->sponsorName = $this->lookupSponsorName($this->sponsorUsername);
+    }
+
+    protected function lookupSponsorName(string $username): string
+    {
+        if ($username === '') {
+            return '';
+        }
+
+        return User::query()
+            ->where('username', $username)
+            ->value('name') ?? '';
     }
 
     protected function resolveSponsor(): ?User
@@ -261,28 +229,17 @@ class Create extends Component
 
     public function save(): void
     {
+        $this->normalizeFormState();
+
         $validated = $this->validate($this->formRules(), [], $this->validationAttributes());
-        $phone = $this->normalizePhone($validated['phone']);
         $sponsor = $this->resolveSponsor();
 
-        if ($phone === '') {
-            $this->addError('phone', 'Phone number is required.');
-
-            return;
-        }
-
-        if (User::query()->where('phone', $phone)->exists()) {
-            $this->addError('phone', 'The phone has already been taken.');
-
-            return;
-        }
-
-        DB::transaction(function () use ($validated, $phone, $sponsor): void {
+        DB::transaction(function () use ($validated, $sponsor): void {
             $user = User::create([
                 'name' => $validated['name'],
-                'username' => Str::lower($validated['username']),
-                'email' => Str::lower($validated['email']),
-                'phone' => $phone,
+                'username' => $validated['username'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
                 'password' => $validated['password'],
                 'status' => 'active',
                 'agree_ethic' => true,
@@ -302,7 +259,7 @@ class Create extends Component
                 'country_id' => $this->countryId,
                 'province_id' => $validated['provinceId'] ?: null,
                 'city_id' => $validated['cityId'] ?: null,
-                'district_id' => $validated['districtId'] ?: null,
+                'regency_id' => $validated['regencyId'] ?: null,
                 'village_id' => $validated['villageId'] ?: null,
             ]);
 
@@ -351,7 +308,7 @@ class Create extends Component
             'npwp',
             'provinceId',
             'cityId',
-            'districtId',
+            'regencyId',
             'villageId',
             'address',
             'bankId',
@@ -362,9 +319,7 @@ class Create extends Component
             'sponsorName',
         ]);
 
-        $this->countryId = Models\Country::query()
-            ->where('iso', 'id')
-            ->value('id') ?? Models\Country::query()->value('id');
+        $this->countryId = $this->defaultCountryId();
         $this->asStockist = 'member';
         $this->isStockistCentral = false;
         $this->resetValidation();
@@ -377,7 +332,7 @@ class Create extends Component
         return view('livewire.member.create', [
             'provinces' => $this->provinces(),
             'cities' => $this->cities(),
-            'districts' => $this->districts(),
+            'regencies' => $this->regencies(),
             'villages' => $this->villages(),
             'banks' => $this->banks(),
             'packages' => $this->packages(),

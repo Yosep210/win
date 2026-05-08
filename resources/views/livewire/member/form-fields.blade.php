@@ -64,10 +64,10 @@
             @endforeach
         </flux:select>
 
-        <flux:select wire:model.live="districtId" :label="__('District')">
-            <flux:select.option value="">{{ __('Select district') }}</flux:select.option>
-            @foreach ($districts as $district)
-            <flux:select.option value="{{ $district->id }}">{{ $district->name }}</flux:select.option>
+        <flux:select wire:model.live="regencyId" :label="__('Regency')">
+            <flux:select.option value="">{{ __('Select regency') }}</flux:select.option>
+            @foreach ($regencies as $regency)
+            <flux:select.option value="{{ $regency->id }}">{{ $regency->name }}</flux:select.option>
             @endforeach
         </flux:select>
 

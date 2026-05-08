@@ -10,14 +10,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['province_id', 'name', 'type'])]
 class City extends Model
 {
+    public $timestamps = false;
+
     public function province(): BelongsTo
     {
         return $this->belongsTo(Province::class);
     }
 
-    public function districts(): HasMany
+    public function regencies(): HasMany
     {
-        return $this->hasMany(District::class);
+        return $this->hasMany(Regency::class);
     }
 
     public static function cityCount(): int

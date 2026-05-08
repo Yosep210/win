@@ -31,7 +31,7 @@ final class MembershipTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['user_name', 'user_username', 'user_email', 'package_name', 'package_code', 'rank_name', 'rank_code', 'as_stockist', 'is_stockist_central', 'stockist_name', 'stockist_province_id', 'stockist_city_id', 'stockist_district_id', 'stockist_village', 'wd_status', 'wd_min', 'is_ro_enabled', 'joined_at', 'upgraded_at', 'stockist_at', 'last_ro_at', 'created_at'];
+        $allowedSorts = ['user_name', 'user_username', 'user_email', 'package_name', 'package_code', 'rank_name', 'rank_code', 'as_stockist', 'is_stockist_central', 'stockist_name', 'stockist_province_id', 'stockist_city_id', 'stockist_regency_id', 'stockist_village', 'wd_status', 'wd_min', 'is_ro_enabled', 'joined_at', 'upgraded_at', 'stockist_at', 'last_ro_at', 'created_at'];
         $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'memberships.id';
 
         // Map alias fields to actual table columns for ROW_NUMBER
@@ -48,7 +48,7 @@ final class MembershipTable extends PowerGridComponent
             'stockist_name' => 'memberships.stockist_name',
             'stockist_province_id' => 'memberships.stockist_province_id',
             'stockist_city_id' => 'memberships.stockist_city_id',
-            'stockist_district_id' => 'memberships.stockist_district_id',
+            'stockist_regency_id' => 'memberships.stockist_regency_id',
             'stockist_village' => 'memberships.stockist_village',
             'wd_status' => 'memberships.wd_status',
             'wd_min' => 'memberships.wd_min',
@@ -115,7 +115,7 @@ final class MembershipTable extends PowerGridComponent
             ->add('stockist_name')
             ->add('stockist_province_id')
             ->add('stockist_city_id')
-            ->add('stockist_district_id')
+            ->add('stockist_regency_id')
             ->add('stockist_village')
             ->add('stockist_address')
             ->add('wd_status')
@@ -144,7 +144,7 @@ final class MembershipTable extends PowerGridComponent
             Column::make('Stockist name', 'stockist_name')->sortable(),
             Column::make('Stockist province id', 'stockist_province_id'),
             Column::make('Stockist city id', 'stockist_city_id'),
-            Column::make('Stockist district id', 'stockist_district_id'),
+            Column::make('Stockist regency id', 'stockist_regency_id'),
             Column::make('Stockist village', 'stockist_village')->sortable(),
             Column::make('Stockist address', 'stockist_address')->sortable(),
             Column::make('Wd status', 'wd_status')->sortable(),

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('stockist_name')->nullable();
             $table->foreignId('stockist_province_id')->nullable()->constrained('provinces')->nullOnDelete();
             $table->foreignId('stockist_city_id')->nullable()->constrained('cities')->nullOnDelete();
-            $table->foreignId('stockist_district_id')->nullable()->constrained('districts')->nullOnDelete();
+            $table->foreignId('stockist_regency_id')->nullable()->constrained('regencies')->nullOnDelete();
             $table->string('stockist_village')->nullable();
             $table->text('stockist_address')->nullable();
             $table->string('wd_status')->default('manual');

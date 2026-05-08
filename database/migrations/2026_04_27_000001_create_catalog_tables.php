@@ -62,8 +62,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('country_id')->constrained('countries')->cascadeOnDelete();
             $table->string('name');
-            // $table->string('code')->nullable()->index();
-            $table->timestamps();
         });
 
         Schema::create('cities', function (Blueprint $table) {
@@ -71,35 +69,26 @@ return new class extends Migration
             $table->foreignId('province_id')->constrained('provinces')->cascadeOnDelete();
             $table->string('name');
             $table->enum('type', ['city', 'regency'])->nullable();
-            // $table->string('code')->nullable()->index();
-            // $table->string('postal_code', 10)->nullable();
-            // $table->string('external_id')->nullable()->index();
-            $table->timestamps();
         });
 
-        Schema::create('districts', function (Blueprint $table) {
+        Schema::create('regencies', function (Blueprint $table) {
             $table->id();
             $table->foreignId('city_id')->constrained('cities')->cascadeOnDelete();
             $table->string('name');
-            // $table->string('postal_code', 10)->nullable();
-            // $table->string('external_id')->nullable()->index();
-            $table->timestamps();
         });
 
         Schema::create('villages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('district_id')->constrained('districts')->cascadeOnDelete();
+            $table->foreignId('regency_id')->constrained('regencies')->cascadeOnDelete();
             $table->string('name');
             $table->string('postal_code', 10)->nullable();
-            // $table->string('external_id')->nullable()->index();
-            $table->timestamps();
         });
     }
 
     public function down(): void
     {
         Schema::dropIfExists('villages');
-        Schema::dropIfExists('districts');
+        Schema::dropIfExists('regencies');
         Schema::dropIfExists('cities');
         Schema::dropIfExists('provinces');
         Schema::dropIfExists('countries');

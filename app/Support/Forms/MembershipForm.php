@@ -3,11 +3,11 @@
 namespace App\Support\Forms;
 
 use App\Models\City;
-use App\Models\District;
 use App\Models\Membership;
 use App\Models\Package;
 use App\Models\Province;
 use App\Models\Rank;
+use App\Models\Regency;
 use App\Models\User;
 
 class MembershipForm
@@ -100,12 +100,12 @@ class MembershipForm
                     'placeholder' => 'Pilih kota',
                 ],
                 [
-                    'name' => 'stockist_district_id',
-                    'label' => 'Kecamatan Stockist',
+                    'name' => 'stockist_regency_id',
+                    'label' => 'Regency Stockist',
                     'type' => 'select',
-                    'validation' => ['nullable', 'exists:districts,id'],
-                    'options' => District::query()->pluck('name', 'id')->toArray(),
-                    'placeholder' => 'Pilih kecamatan',
+                    'validation' => ['nullable', 'exists:regencies,id'],
+                    'options' => Regency::query()->pluck('name', 'id')->toArray(),
+                    'placeholder' => 'Pilih regency',
                 ],
                 [
                     'name' => 'stockist_village',

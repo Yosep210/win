@@ -5,7 +5,7 @@ use Spatie\Permission\Models\Permission;
 use App\Models\Bank;
 use App\Models\City;
 use App\Models\Province;
-use App\Models\District;
+use App\Models\Regency;
 use App\Models\Country;
 
 $userCount = User::userCount();
@@ -15,7 +15,7 @@ $bankCount = Bank::bankCount();
 $countryCount = Country::countryCount();
 $provinceCount = Province::provinceCount();
 $cityCount = City::cityCount();
-$districtCount = District::districtCount();
+$regencyCount = Regency::regencyCount();
 @endphp
 <x-layouts::app :title="__('Dashboard')">
     <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
@@ -99,11 +99,11 @@ $districtCount = District::districtCount();
             </div>
             <div
                 class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                @if (!empty ($districtCount))
+                @if (!empty ($regencyCount))
                 <div class="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                    <h2>{{ __('Jumlah Districts') }}</h2>
+                    <h2>{{ __('Jumlah Regencies') }}</h2>
                     <span class="text-2xl font-bold text-gray-900 dark:text-neutral-100">
-                        {{ number_format($districtCount) }}
+                        {{ number_format($regencyCount) }}
                     </span>
                 </div>
                 @endif
