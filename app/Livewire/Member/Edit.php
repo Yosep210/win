@@ -27,6 +27,8 @@ class Edit extends Component
 
     public string $phone = '';
 
+    public ?int $phoneCountryId = null;
+
     public string $birthDate = '';
 
     public string $gender = '';
@@ -82,6 +84,7 @@ class Edit extends Component
             $this->villageId = $profile->village_id;
             $this->address = (string) ($profile->address ?? '');
             $this->countryId = $profile->country_id;
+            $this->phoneCountryId = $profile->country_id;
         }
 
         if ($bankAccount = $user->bankAccounts->sortByDesc('is_primary')->first()) {
@@ -97,6 +100,14 @@ class Edit extends Component
         }
 
         $this->countryId ??= $this->defaultCountryId();
+    }
+
+    public function updatedCountryId(): void
+    {
+        $this->provinceId = null;
+        $this->cityId = null;
+        $this->regencyId = null;
+        $this->villageId = null;
     }
 
     public function updatedProvinceId(): void
@@ -161,25 +172,6 @@ class Edit extends Component
             'accountName' => 'account name',
             'packageId' => 'package',
         ];
-    }
-
-    protected function normalizePhone(string $phone): string
-    {
-        $phone = preg_replace('/[^\d+]/', '', trim($phone)) ?? '';
-
-        if ($phone === '') {
-            return '';
-        }
-
-        if (str_starts_with($phone, '0')) {
-            return '+62'.substr($phone, 1);
-        }
-
-        if (! str_starts_with($phone, '+')) {
-            return '+'.$phone;
-        }
-
-        return $phone;
     }
 
     protected function sanitizeString(?string $value): string
@@ -281,6 +273,7 @@ class Edit extends Component
     public function render(): View
     {
         return view('livewire.member.edit', [
+            'countries' => $this->countries(),
             'provinces' => $this->provinces(),
             'cities' => $this->cities(),
             'regencies' => $this->regencies(),

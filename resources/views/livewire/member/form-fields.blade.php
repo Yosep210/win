@@ -7,7 +7,23 @@
         <flux:input wire:model="username" :label="__('Username')" type="text" required autocomplete="username" />
         <flux:input wire:model="name" :label="__('Full Name')" type="text" required autocomplete="name" />
         <flux:input wire:model="email" :label="__('Email Address')" type="email" required autocomplete="email" />
-        <flux:input wire:model="phone" :label="__('Phone / WhatsApp')" type="text" required autocomplete="tel" />
+
+        <div class="flex flex-col gap-2">
+            <flux:label>{{ __('Phone / WhatsApp') }}</flux:label>
+            <div class="flex items-start">
+                {{-- Selector Kode Negara --}}
+                <flux:select wire:model.live="phoneCountryId" class="rounded-r-none! w-36 shrink-0 border-r-0">
+                    @foreach ($countries as $country)
+                    <flux:select.option value="{{ $country->id }}">{{ strtoupper($country->iso ?? '??') }} (+{{
+                        $country->phone_code }})</flux:select.option>
+                    @endforeach
+                </flux:select>
+                {{-- Input Nomor Telepon --}}
+                <flux:input wire:model="phone" type="text" required autocomplete="tel" class="flex-1 !rounded-l-none"
+                    prefix="+{{ $this->getSelectedCountryPhoneCode() }}" placeholder="812345678" />
+            </div>
+            <flux:error name="phone" />
+        </div>
 
         {{-- Tampilkan password hanya saat membuat member baru --}}
         @if (!($isEdit ?? false))
@@ -50,6 +66,13 @@
     @endif
 
     <div class="grid gap-4 md:grid-cols-2">
+        <flux:select wire:model.live="countryId" :label="__('Country')">
+            <flux:select.option value="">{{ __('Select country') }}</flux:select.option>
+            @foreach ($countries as $country)
+            <flux:select.option value="{{ $country->id }}">{{ $country->name }}</flux:select.option>
+            @endforeach
+        </flux:select>
+
         <flux:select wire:model.live="provinceId" :label="__('Province')">
             <flux:select.option value="">{{ __('Select province') }}</flux:select.option>
             @foreach ($provinces as $province)

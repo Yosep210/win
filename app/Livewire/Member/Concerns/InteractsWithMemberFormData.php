@@ -18,6 +18,50 @@ trait InteractsWithMemberFormData
             ?? Models\Country::query()->where('status', true)->value('id');
     }
 
+    public function getSelectedCountryPhoneCode(): string
+    {
+        $countryId = property_exists($this, 'phoneCountryId') && $this->phoneCountryId
+            ? $this->phoneCountryId
+            : ($this->countryId ?? null);
+
+        if (! $countryId) {
+            return '62';
+        }
+
+        return (string) (Models\Country::query()->where('id', $countryId)->value('phone_code') ?? '62');
+    }
+
+    protected function normalizePhone(string $phone): string
+    {
+        $code = $this->getSelectedCountryPhoneCode();
+        $phone = preg_replace('/[^\d+]/', '', trim($phone)) ?? '';
+
+        if ($phone === '') {
+            return '';
+        }
+
+        // Jika sudah diawali '+', asumsikan format internasional sudah benar
+        if (str_starts_with($phone, '+')) {
+            return $phone;
+        }
+
+        // Jika diawali '0', ganti dengan kode negara yang terpilih
+        if (str_starts_with($phone, '0')) {
+            return '+'.$code.substr($phone, 1);
+        }
+
+        // Sisanya, tambahkan kode negara di depan nomor
+        return '+'.$code.$phone;
+    }
+
+    protected function countries(): Collection
+    {
+        return Models\Country::query()
+            ->where('status', true)
+            ->orderBy('name')
+            ->get();
+    }
+
     protected function provinces(): Collection
     {
         if (! $this->countryId) {

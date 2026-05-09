@@ -28,6 +28,8 @@ class Create extends Component
 
     public string $phone = '';
 
+    public ?int $phoneCountryId = null;
+
     public string $password = '';
 
     public string $password_confirmation = '';
@@ -71,6 +73,15 @@ class Create extends Component
     public function mount(): void
     {
         $this->countryId = $this->defaultCountryId();
+        $this->phoneCountryId = $this->defaultCountryId();
+    }
+
+    public function updatedCountryId(): void
+    {
+        $this->provinceId = null;
+        $this->cityId = null;
+        $this->regencyId = null;
+        $this->villageId = null;
     }
 
     public function updatedProvinceId(): void
@@ -142,25 +153,6 @@ class Create extends Component
             'asStockist' => ['required', Rule::in(['member', 'stockist'])],
             'sponsorUsername' => ['nullable', 'string', 'exists:users,username', 'different:username'],
         ];
-    }
-
-    protected function normalizePhone(string $phone): string
-    {
-        $phone = preg_replace('/[^\d+]/', '', trim($phone)) ?? '';
-
-        if ($phone === '') {
-            return '';
-        }
-
-        if (str_starts_with($phone, '0')) {
-            return '+62'.substr($phone, 1);
-        }
-
-        if (! str_starts_with($phone, '+')) {
-            return '+'.$phone;
-        }
-
-        return $phone;
     }
 
     protected function sanitizeString(?string $value): string
@@ -317,9 +309,11 @@ class Create extends Component
             'packageId',
             'sponsorUsername',
             'sponsorName',
+            'phoneCountryId',
         ]);
 
         $this->countryId = $this->defaultCountryId();
+        $this->phoneCountryId = $this->defaultCountryId();
         $this->asStockist = 'member';
         $this->isStockistCentral = false;
         $this->resetValidation();
@@ -330,6 +324,7 @@ class Create extends Component
     public function render(): View
     {
         return view('livewire.member.create', [
+            'countries' => $this->countries(),
             'provinces' => $this->provinces(),
             'cities' => $this->cities(),
             'regencies' => $this->regencies(),
