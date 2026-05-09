@@ -20,6 +20,10 @@ final class SupplierTable extends PowerGridComponent
 {
     public string $tableName = 'SupplierTable';
 
+    public string $sortField = 'name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -31,8 +35,8 @@ final class SupplierTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['id', 'name', 'email', 'phone', 'contact_id', 'status', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $allowedSorts = ['name', 'email', 'phone', 'contact_id', 'status', 'created_at'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Supplier::query()

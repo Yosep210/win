@@ -19,6 +19,10 @@ final class CountryTable extends PowerGridComponent
 {
     public string $tableName = 'countryTable';
 
+    public string $sortField = 'name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -30,8 +34,8 @@ final class CountryTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['id', 'iso', 'name', 'nice_name', 'iso3', 'numcode', 'phone_code', 'status'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $allowedSorts = ['iso', 'name', 'nice_name', 'iso3', 'numcode', 'phone_code', 'status'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Country::query()

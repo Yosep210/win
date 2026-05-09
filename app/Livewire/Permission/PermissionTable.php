@@ -20,6 +20,10 @@ final class PermissionTable extends PowerGridComponent
 {
     public string $tableName = 'permissionTable';
 
+    public string $sortField = 'name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -32,8 +36,7 @@ final class PermissionTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSorts = ['name', 'guard_name', 'created_at'];
-
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Permission::query()

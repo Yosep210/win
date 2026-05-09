@@ -20,6 +20,10 @@ final class BankTable extends PowerGridComponent
 {
     public string $tableName = 'bankTable';
 
+    public string $sortField = 'name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -32,7 +36,7 @@ final class BankTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSorts = ['code', 'name', 'status', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Bank::query()

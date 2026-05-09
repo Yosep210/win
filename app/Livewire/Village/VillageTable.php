@@ -19,6 +19,10 @@ final class VillageTable extends PowerGridComponent
 {
     public string $tableName = 'villageTable';
 
+    public string $sortField = 'regency_name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -30,23 +34,19 @@ final class VillageTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['regency_name', 'name', 'postal_code', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'villages.id';
-
-        $rowNumberSortField = match ($sortField) {
+        $allowedSorts = [
             'regency_name' => 'regencies.name',
             'name' => 'villages.name',
             'postal_code' => 'villages.postal_code',
-            'created_at' => 'villages.created_at',
-            default => 'villages.id',
-        };
+        ];
 
+        $sortField = $allowedSorts[$this->sortField] ?? 'regencies.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Village::query()
             ->leftJoin('regencies', 'villages.regency_id', '=', 'regencies.id')
             ->select('villages.*', 'regencies.name as regency_name')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array

@@ -20,6 +20,10 @@ final class ProductTable extends PowerGridComponent
 {
     public string $tableName = 'productTable';
 
+    public string $sortField = 'name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -31,26 +35,22 @@ final class ProductTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['category_name', 'code', 'name', 'description', 'status', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'products.id';
-
-        // Map alias fields to actual table columns for ROW_NUMBER
-        $rowNumberSortField = match ($sortField) {
+        $allowedSorts = [
             'category_name' => 'product_categories.name',
             'name' => 'products.name',
             'sku' => 'products.sku',
             'price' => 'products.price',
             'stock' => 'products.stock',
             'status' => 'products.status',
-            default => 'products.id'
-        };
-
+            'created_at' => 'products.created_at',
+        ];
+        $sortField = $allowedSorts[$this->sortField] ?? 'products.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Product::query()
             ->leftJoin('product_categories', 'products.category_id', '=', 'product_categories.id')
             ->select('products.*', 'product_categories.name as category_name')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array

@@ -19,6 +19,10 @@ final class CityTable extends PowerGridComponent
 {
     public string $tableName = 'cityTable';
 
+    public string $sortField = 'province_name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -30,23 +34,19 @@ final class CityTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['province_name', 'name', 'type', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'cities.id';
-
-        $rowNumberSortField = match ($sortField) {
+        $allowedSorts = [
             'province_name' => 'provinces.name',
             'name' => 'cities.name',
             'type' => 'cities.type',
-            'created_at' => 'cities.created_at',
-            default => 'cities.id',
-        };
+        ];
 
+        $sortField = $allowedSorts[$this->sortField] ?? 'provinces.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return City::query()
             ->leftJoin('provinces', 'cities.province_id', '=', 'provinces.id')
             ->select('cities.*', 'provinces.name as province_name')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array

@@ -19,6 +19,10 @@ final class ProvinceTable extends PowerGridComponent
 {
     public string $tableName = 'provinceTable';
 
+    public string $sortField = 'name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -30,22 +34,17 @@ final class ProvinceTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['country_name', 'name'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'provinces.id';
-
-        // Map alias fields to actual table columns for ROW_NUMBER
-        $rowNumberSortField = match ($sortField) {
+        $allowedSorts = [
             'country_name' => 'countries.name',
             'name' => 'provinces.name',
-            default => 'provinces.id'
-        };
-
+        ];
+        $sortField = $allowedSorts[$this->sortField] ?? 'provinces.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Province::query()
             ->leftJoin('countries', 'provinces.country_id', '=', 'countries.id')
             ->select('provinces.*', 'countries.name as country_name')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array

@@ -19,6 +19,10 @@ final class RegencyTable extends PowerGridComponent
 {
     public string $tableName = 'regencyTable';
 
+    public string $sortField = 'city_name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -30,22 +34,17 @@ final class RegencyTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['city_name', 'name', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'regencies.id';
-
-        $rowNumberSortField = match ($sortField) {
+        $allowedSorts = [
             'city_name' => 'cities.name',
             'name' => 'regencies.name',
-            'created_at' => 'regencies.created_at',
-            default => 'regencies.id',
-        };
-
+        ];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'cities.name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Regency::query()
             ->leftJoin('cities', 'regencies.city_id', '=', 'cities.id')
             ->select('regencies.*', 'cities.name as city_name')
-            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$rowNumberSortField.' '.$sortDirection.') AS no');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array

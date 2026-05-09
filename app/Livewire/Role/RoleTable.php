@@ -20,6 +20,10 @@ final class RoleTable extends PowerGridComponent
 {
     public string $tableName = 'roleTable';
 
+    public string $sortField = 'name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -33,7 +37,7 @@ final class RoleTable extends PowerGridComponent
     {
         $allowedSorts = ['name', 'guard_name', 'permissions_count', 'created_at'];
 
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
         $orderBy = match ($sortField) {
             'permissions_count' => '(select count(*) from role_has_permissions where roles.id = role_has_permissions.role_id)',

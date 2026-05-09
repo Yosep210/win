@@ -93,7 +93,11 @@ class IndonesianPostalCodeSeeder extends Seeder
         }
 
         foreach (array_chunk(array_values($updates), 1000) as $chunk) {
-            DB::table('villages')->upsert($chunk, ['id'], ['postal_code']);
+            foreach ($chunk as &$row) {
+                DB::table('villages')
+                    ->where('id', $row['id'])
+                    ->update(['postal_code' => $row['postal_code']]);
+            }
         }
 
         $postFilledCount = DB::table('villages')->whereNotNull('postal_code')->count();
@@ -125,12 +129,8 @@ class IndonesianPostalCodeSeeder extends Seeder
             ->join('regencies', 'regencies.id', '=', 'villages.regency_id')
             ->join('cities', 'cities.id', '=', 'regencies.city_id')
             ->join('provinces', 'provinces.id', '=', 'cities.province_id')
-            ->select(
-                'villages.id',
-                'villages.name as village_name',
-                'regencies.name as regency_name',
-                'cities.name as city_name',
-                'provinces.name as province_name'
+            ->selectRaw(
+                'villages.id, REPLACE(UPPER(villages.name), \' \', \'\') as village_name, REPLACE(UPPER(regencies.name), \' \', \'\') as regency_name, REPLACE(UPPER(cities.name), \' \', \'\') as city_name, REPLACE(UPPER(provinces.name), \' \', \'\') as province_name'
             )
             ->get();
 
@@ -265,6 +265,20 @@ class IndonesianPostalCodeSeeder extends Seeder
             $variants[] = $collapsed;
         }
 
+        // Add variant without apostrophes
+        $currentNoApostrophe = str_replace("'", '', $current);
+        $currentNoApostrophe = preg_replace('/\s+/', ' ', trim($currentNoApostrophe)) ?? trim($currentNoApostrophe);
+
+        if ($currentNoApostrophe !== '' && $currentNoApostrophe !== $current) {
+            $variants[] = $currentNoApostrophe;
+
+            $collapsedNoApostrophe = str_replace(' ', '', $currentNoApostrophe);
+
+            if ($collapsedNoApostrophe !== '') {
+                $variants[] = $collapsedNoApostrophe;
+            }
+        }
+
         return array_values(array_unique($variants));
     }
 
@@ -274,10 +288,10 @@ class IndonesianPostalCodeSeeder extends Seeder
         mixed $regencyName,
         mixed $villageName,
     ): ?string {
-        $normalizedProvince = $this->normalizeName($provinceName);
-        $normalizedCity = $this->normalizeName($cityName);
-        $normalizedRegency = $this->normalizeName($regencyName);
-        $normalizedVillage = $this->normalizeName($villageName);
+        $normalizedProvince = str_replace(' ', '', $this->normalizeName($provinceName));
+        $normalizedCity = str_replace(' ', '', $this->normalizeName($cityName));
+        $normalizedRegency = str_replace(' ', '', $this->normalizeName($regencyName));
+        $normalizedVillage = str_replace(' ', '', $this->normalizeName($villageName));
 
         if ($normalizedProvince === '' || $normalizedCity === '' || $normalizedRegency === '' || $normalizedVillage === '') {
             return null;

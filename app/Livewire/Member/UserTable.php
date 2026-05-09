@@ -20,6 +20,10 @@ final class UserTable extends PowerGridComponent
 
     public string $tableName = 'userTable';
 
+    public string $sortField = 'name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -32,12 +36,12 @@ final class UserTable extends PowerGridComponent
     public function datasource(): Builder
     {
         $allowedSorts = ['name', 'username', 'email', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return User::query()
             ->with('roles')
-            // ->withoutRole(['admin', 'staff'])
+            ->withoutRole(['admin', 'staff'])
             ->select('users.*')
             ->selectRaw('ROW_NUMBER() OVER (ORDER BY users.'.$sortField.' '.$sortDirection.') AS no');
     }

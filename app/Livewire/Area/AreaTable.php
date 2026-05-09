@@ -19,6 +19,10 @@ final class AreaTable extends PowerGridComponent
 {
     public string $tableName = 'areaTable';
 
+    public string $sortField = 'name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -30,8 +34,8 @@ final class AreaTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['id', 'name', 'code'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $allowedSorts = ['name', 'code'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return Area::query()

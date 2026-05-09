@@ -20,6 +20,10 @@ final class PackageTable extends PowerGridComponent
 {
     public string $tableName = 'packageTable';
 
+    public string $sortField = 'name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -31,7 +35,13 @@ final class PackageTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        return Package::query();
+        $allowedSorts = ['name', 'code', 'price', 'sort_order'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'name';
+        $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        return Package::query()
+            ->select('packages.*')
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY packages.'.$sortField.' '.$sortDirection.') AS no');
     }
 
     public function relationSearch(): array
@@ -42,7 +52,7 @@ final class PackageTable extends PowerGridComponent
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
-            ->add('id')
+            ->add('no')
             ->add('code')
             ->add('name')
             ->add('sort_order')
@@ -66,10 +76,10 @@ final class PackageTable extends PowerGridComponent
     public function columns(): array
     {
         return [
-            Column::make('Id', 'id'),
+            Column::make('#', 'no'),
             Column::make('Code', 'code')->sortable(),
             Column::make('Name', 'name')->sortable(),
-            Column::make('Sort order', 'sort_order'),
+            Column::make('Sort order', 'sort_order')->sortable(),
             Column::make('Package count', 'package_count'),
             Column::make('Bv', 'bv'),
             Column::make('Price', 'price')->sortable(),

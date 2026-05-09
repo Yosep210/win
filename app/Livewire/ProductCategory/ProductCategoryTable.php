@@ -20,6 +20,10 @@ final class ProductCategoryTable extends PowerGridComponent
 {
     public string $tableName = 'ProductCategoryTable';
 
+    public string $sortField = 'name';
+
+    public string $sortDirection = 'asc';
+
     public function setUp(): array
     {
         return [
@@ -31,8 +35,8 @@ final class ProductCategoryTable extends PowerGridComponent
 
     public function datasource(): Builder
     {
-        $allowedSorts = ['id', 'code', 'name', 'status', 'created_at'];
-        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'id';
+        $allowedSorts = ['code', 'name', 'status', 'created_at'];
+        $sortField = in_array($this->sortField, $allowedSorts) ? $this->sortField : 'name';
         $sortDirection = $this->sortDirection === 'desc' ? 'desc' : 'asc';
 
         return ProductCategory::query()
