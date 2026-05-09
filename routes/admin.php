@@ -23,6 +23,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::livewire('products', Livewire\Product\Index::class)->name('product.index');
     Route::livewire('product-categories', Livewire\ProductCategory\Index::class)->name('product-category.index');
     Route::livewire('product-variants', Livewire\ProductVariant\Index::class)->name('product-variant.index');
-    Route::livewire('Supplier', Livewire\Supplier\Index::class)->name('Supplier.index');
+    Route::livewire('supplier', Livewire\Supplier\Index::class)->name('supplier.index');
     Route::livewire('village', Livewire\Village\Index::class)->name('village.index');
 });
